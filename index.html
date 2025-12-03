@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luy Tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-navbar">
+        <div class="container-fluid">
+            <div class="navbar-content">
+                <div class="brand">
+                    <h1>💰 Luy Tracker</h1>
+                    <p>Smart Money Management</p>
+                </div>
+                <div class="nav-actions">
+                    <button class="nav-btn" onclick="showPage('dashboard')">
+                        <span>📊</span> <span class="nav-text" data-key="dashboard">Dashboard</span>
+                    </button>
+                    <button class="nav-btn" onclick="showPage('analytics')">
+                        <span>📈</span> <span class="nav-text" data-key="analytics">Analytics</span>
+                    </button>
+                    <button class="nav-btn" onclick="showPage('reports')">
+                        <span>📋</span> <span class="nav-text" data-key="reports">Reports</span>
+                    </button>
+                    <button class="nav-btn" onclick="openCategoryModal()">
+                        <span>📁</span> <span class="nav-text" data-key="categories">Categories</span>
+                    </button>
+                    <button class="nav-btn" onclick="toggleTheme()">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+                    <button class="nav-btn" onclick="toggleLanguage()">
+                        <span id="langIcon">🇬🇧</span>
+                    </button>
+                </div>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-nav-btn" onclick="showPage('dashboard'); toggleMobileMenu()">📊 <span class="nav-text" data-key="dashboard">Dashboard</span></button>
+        <button class="mobile-nav-btn" onclick="showPage('analytics'); toggleMobileMenu()">📈 <span class="nav-text" data-key="analytics">Analytics</span></button>
+        <button class="mobile-nav-btn" onclick="showPage('reports'); toggleMobileMenu()">📋 <span class="nav-text" data-key="reports">Reports</span></button>
+        <button class="mobile-nav-btn" onclick="openCategoryModal(); toggleMobileMenu()">📁 <span class="nav-text" data-key="categories">Categories</span></button>
+        <button class="mobile-nav-btn" onclick="toggleTheme()">🌙 <span class="nav-text" data-key="theme">Theme</span></button>
+        <button class="mobile-nav-btn" onclick="toggleLanguage()"><span id="langIcon2">🇬🇧</span> Language</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page-content active">
+            <div class="container-fluid">
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <div>
+                        <h2 id="welcome-title">Welcome Back! 👋</h2>
+                        <p id="welcome-subtitle">Here's your financial overview</p>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card gradient-blue">
+                        <div class="stat-icon">💳</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="stat-1-label">This Month Spending</div>
+                            <div class="stat-value" id="totalExpenses">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-green">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="stat-2-label">Total</div>
+                            <div class="stat-value" id="allTimeTotal">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-purple">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="stat-3-label">Daily Avg</div>
+                            <div class="stat-value" id="dailyAverage">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-orange">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="stat-4-label">Largest</div>
+                            <div class="stat-value" id="largestExpense">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 id="chart-category">Category Breakdown</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 id="chart-trend">Monthly Trend</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Insights: Top Spending Days -->
+                <div class="table-section">
+                    <div class="table-header">
+                        <h3 id="top-days-title">📅 Top Spending Days</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="expense-table">
+                            <thead>
+                                <tr>
+                                    <th id="table-day">Day</th>
+                                    <th id="table-amount">Total</th>
+                                    <th id="table-avg">Avg</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboardSpendingBody">
+                                <tr><td colspan="3" class="text-center">No data</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add Expense Form -->
+                <div class="add-expense-section">
+                    <div class="section-header">
+                        <h3 id="form-title">➕ Add New Expense</h3>
+                    </div>
+                    <form id="expenseForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label id="form-date">Date</label>
+                                <input type="date" id="expenseDate" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label id="form-amount">Amount</label>
+                                <input type="number" min="0" step="0.01" id="expenseAmount" class="form-input" placeholder="0.00" required>
+                            </div>
+                            <div class="form-group">
+                                <label id="form-currency">Currency</label>
+                                <select id="expenseCurrency" class="form-input">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="KHR">Riel (៛)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label id="form-money-type">Money Type</label>
+                                <select id="expenseMoneyType" class="form-input" required>
+                                    <option value="" id="select-money-type">Select money type</option>
+                                    <option value="Cash" id="money-self">Self Money</option>
+                                    <option value="Bank" id="money-house">House Money</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label id="form-expense-type">Expense Type</label>
+                                <select id="expenseType" class="form-input" required>
+                                    <option value="" id="select-expense-type">Select expense type</option>
+                                    <option value="Cash" id="money-cash">Cash</option>
+                                    <option value="Bank" id="money-bank">Bank</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label id="form-category">Category</label>
+                                <select id="expenseCategory" class="form-input" required>
+                                    <option value="" id="select-category">Select category</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label id="form-description">Description</label>
+                            <textarea id="expenseNote" class="form-input" rows="3" placeholder="Optional notes..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit" id="btn-add-expense">Add Expense</button>
+                    </form>
+                </div>
+
+                <!-- Expense Table -->
+                <div class="table-section">
+                    <div class="table-header">
+                        <h3 id="table-title">Recent Transactions</h3>
+                        <div class="table-filters">
+                            <input type="text" id="searchExpenses" class="filter-input" placeholder="Search..." data-placeholder="search-placeholder">
+                            <select id="filterMonth" class="filter-input">
+                                <option value="" id="filter-all-time">All Time</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="expense-table">
+                            <thead>
+                                <tr>
+                                    <th id="table-date">Date</th>
+                                    <th id="table-amount-col">Amount</th>
+                                    <th id="table-category">Category</th>
+                                    <th id="table-money-type">Money Type</th>
+                                    <th id="table-type">Type</th>
+                                    <th id="table-description">Description</th>
+                                    <th id="table-actions" class="no-print">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseTableBody">
+                                <tr>
+                                    <td colspan="7" class="empty-state">
+                                        <div class="empty-icon">💸</div>
+                                        <p>No expenses yet. Add your first expense above!</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <button id="downloadCSV" class="action-btn">📥 CSV</button>
+                        <button id="downloadPDF" class="action-btn">📥 PDF</button>
+                        <button id="importData" class="action-btn">📤 Import</button>
+                        <input type="file" id="importFile" style="display: none;" accept=".xlsx, .xls, .csv">
+                        <button id="clearAll" class="action-btn danger" onclick="clearAllExpenses()">🗑️ Clear All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div id="analytics-page" class="page-content">
+            <div class="container-fluid">
+                <div class="welcome-section">
+                    <h2 id="analytics-title">📈 Analytics & Insights</h2>
+                    <p id="analytics-subtitle">Detailed analysis of your spending patterns</p>
+                </div>
+
+                <div id="insightsSection" class="insights-grid"></div>
+
+                <div class="stats-grid">
+                    <div class="stat-card gradient-teal">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="analytics-stat-1">Total Spent</div>
+                            <div class="stat-value" id="statTotal">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-pink">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="analytics-stat-2">Median</div>
+                            <div class="stat-value" id="statMedian">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-indigo">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="analytics-stat-3">Expenses</div>
+                            <div class="stat-value" id="statCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 id="chart-money-type">Money Type</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="moneyTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 id="chart-12-month">12-Month Trend</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 id="chart-category-dist">Category Distribution</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="categoryAnalyticsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 id="chart-expense-type">Expense Type</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="expenseTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-section">
+                    <div class="table-header">
+                        <h3 id="monthly-summary-title">Monthly Summary</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="expense-table">
+                            <thead>
+                                <tr>
+                                    <th id="table-month">Month</th>
+                                    <th id="table-total">Total</th>
+                                    <th id="table-avg-day">Avg/Day</th>
+                                    <th id="table-transactions">Transactions</th>
+                                    <th id="table-highest">Highest</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthlySummaryBody">
+                                <tr>
+                                    <td colspan="5" class="text-center">No data available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Page -->
+        <div id="reports-page" class="page-content">
+            <div class="container-fluid">
+                <div class="welcome-section">
+                    <h2 id="reports-title">📋 Detailed Reports</h2>
+                    <p id="reports-subtitle">Advanced analytics and monthly breakdowns</p>
+                </div>
+
+                <div class="table-section">
+                    <div class="table-header">
+                        <h3 id="btn-generate">Generate Report</h3>
+                    </div>
+                    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                        <div>
+                            <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.85rem;" id="select-month-label">Select Month</label>
+                            <select id="reportMonth" class="form-input" style="width: 200px;">
+                                <option value="" id="select-month-placeholder">Choose Month...</option>
+                            </select>
+                        </div>
+                        <button class="action-btn" onclick="generateAndDisplayReport()" style="width: auto;" id="generate-btn">Generate Report</button>
+                    </div>
+                </div>
+
+                <!-- Report Stats -->
+                <div id="reportStats" class="stats-grid" style="display: none;">
+                    <div class="stat-card gradient-blue">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="report-stat-1">Total</div>
+                            <div class="stat-value" id="reportTotal">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-green">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="report-stat-2">Average</div>
+                            <div class="stat-value" id="reportAvg">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-purple">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="report-stat-3">Count</div>
+                            <div class="stat-value" id="reportCount">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-orange">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-info">
+                            <div class="stat-label" id="report-stat-4">Highest</div>
+                            <div class="stat-value" id="reportHighest">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown -->
+                <div class="chart-card" id="categoryReportSection" style="display: none; margin-bottom: 2rem;">
+                    <div class="chart-header">
+                        <h3 id="report-category">Category Breakdown</h3>
+                    </div>
+                    <div style="padding: 1.5rem; max-height: 400px; overflow-y: auto;">
+                        <table class="expense-table">
+                            <thead>
+                                <tr>
+                                    <th id="report-cat-col">Category</th>
+                                    <th id="report-amt-col">Amount</th>
+                                    <th id="report-pct-col">%</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportCategoryBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Money Type Breakdown -->
+                <div class="chart-card" id="moneyTypeReportSection" style="display: none; margin-bottom: 2rem;">
+                    <div class="chart-header">
+                        <h3 id="report-money-type">Money Type Breakdown</h3>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <table class="expense-table">
+                            <thead>
+                                <tr>
+                                    <th id="report-type-col">Type</th>
+                                    <th id="report-amt-col2">Amount</th>
+                                    <th id="report-pct-col2">%</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportMoneyTypeBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Daily Spending Pattern -->
+                <div class="chart-card" id="dailyPatternSection" style="display: none; margin-bottom: 2rem;">
+                    <div class="chart-header">
+                        <h3 id="report-daily-pattern">📅 Daily Spending Pattern</h3>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <table class="expense-table">
+                            <thead>
+                                <tr>
+                                    <th id="report-day-col">Day</th>
+                                    <th id="report-total-col">Total</th>
+                                    <th id="report-count-col">Count</th>
+                                    <th id="report-avg-col">Average</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dailyPatternBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-categories">Manage Categories</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input type="text" id="categoryInput" placeholder="New category" class="form-control" data-placeholder="input-new-category">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" id="addCategory">Add</button>
+                        </div>
+                    </div>
+                    <ul id="categoryList" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editExpenseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Expense</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editExpenseForm">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Date</label>
+                                <input type="date" id="editExpenseDate" class="form-control" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Amount</label>
+                                <input type="number" min="0" step="0.01" id="editExpenseAmount" class="form-control" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Currency</label>
+                                <select id="editExpenseCurrency" class="form-control">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="KHR">Riel (៛)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Category</label>
+                                <select id="editExpenseCategory" class="form-control"></select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Money Type</label>
+                                <select id="editExpenseMoneyType" class="form-control">
+                                    <option value="Cash">Self Money</option>
+                                    <option value="Bank">House Money</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Expense Type</label>
+                                <select id="editExpenseType" class="form-control">
+                                    <option value="Cash">Cash</option>
+                                    <option value="Bank">Bank</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Description</label>
+                            <textarea id="editExpenseNote" class="form-control" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Update Expense</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
