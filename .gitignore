@@ -1,7 +1,7 @@
 # ----------------------------------------
 # 1. OS Generated Files (macOS/Windows)
-# ----------------------------------------
-.DS_Store             # macOS system files
+# Ignore macOS system files
+.DS_Store
 Thumbs.db             # Windows system files
 
 # ----------------------------------------
