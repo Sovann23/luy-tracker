@@ -1,0 +1,32 @@
+# ----------------------------------------
+# 1. OS Generated Files (macOS/Windows)
+# ----------------------------------------
+.DS_Store             # macOS system files
+Thumbs.db             # Windows system files
+
+# ----------------------------------------
+# 2. Dependencies and Build Artifacts
+# ----------------------------------------
+# Node.js dependencies (if you ever use NPM/Yarn)
+/node_modules
+
+# Frontend build outputs (e.g., if you use Webpack/Gulp)
+/dist
+/build
+/out
+
+# ----------------------------------------
+# 3. Development Environment Files
+# ----------------------------------------
+# Environment variables/secrets (CRITICAL to ignore!)
+.env
+.local-config.json
+
+# Log files
+*.log
+
+# ----------------------------------------
+# 4. Editors and IDEs (e.g., VS Code, Sublime)
+# ----------------------------------------
+.vscode/              # VS Code settings folder
+*.sublime-workspace
