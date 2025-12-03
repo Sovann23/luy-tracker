@@ -298,7 +298,8 @@ body[data-language="km"] {
 /* Charts Grid */
 .charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    /* Allow smaller cards so more charts fit on wide screens (allows 4 columns on large displays) */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -331,7 +332,8 @@ body[data-language="km"] {
 
 .chart-body {
     padding: 1.5rem;
-    height: 350px;
+    /* Reduced height to better fit multiple charts in one row on deployed pages */
+    height: 280px;
 }
 
 .chart-body canvas {
