@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Top Navigation -->
     <nav class="top-navbar">
         <div class="container-fluid">
             <div class="navbar-content">
@@ -18,17 +17,13 @@
                     <p>Smart Money Management</p>
                 </div>
                 <div class="nav-actions">
-                    <button class="nav-btn" onclick="showPage('dashboard')">
-                        <span>📊</span> <span class="nav-text" data-key="dashboard">Dashboard</span>
+                    <button class="nav-btn" onclick="showPage('dashboard')" id="navDashboard">
                     </button>
-                    <button class="nav-btn" onclick="showPage('analytics')">
-                        <span>📈</span> <span class="nav-text" data-key="analytics">Analytics</span>
+                    <button class="nav-btn" onclick="showPage('analytics')" id="navAnalytics">
                     </button>
-                    <button class="nav-btn" onclick="showPage('reports')">
-                        <span>📋</span> <span class="nav-text" data-key="reports">Reports</span>
+                    <button class="nav-btn" onclick="showPage('reports')" id="navReports">
                     </button>
-                    <button class="nav-btn" onclick="openCategoryModal()">
-                        <span>📁</span> <span class="nav-text" data-key="categories">Categories</span>
+                    <button class="nav-btn" onclick="openCategoryModal()" id="navCategories">
                     </button>
                     <button class="nav-btn" onclick="toggleTheme()">
                         <span id="themeIcon">🌙</span>
@@ -42,66 +37,60 @@
         </div>
     </nav>
 
-    <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
-        <button class="mobile-nav-btn" onclick="showPage('dashboard'); toggleMobileMenu()">📊 <span class="nav-text" data-key="dashboard">Dashboard</span></button>
-        <button class="mobile-nav-btn" onclick="showPage('analytics'); toggleMobileMenu()">📈 <span class="nav-text" data-key="analytics">Analytics</span></button>
-        <button class="mobile-nav-btn" onclick="showPage('reports'); toggleMobileMenu()">📋 <span class="nav-text" data-key="reports">Reports</span></button>
-        <button class="mobile-nav-btn" onclick="openCategoryModal(); toggleMobileMenu()">📁 <span class="nav-text" data-key="categories">Categories</span></button>
-        <button class="mobile-nav-btn" onclick="toggleTheme()">🌙 <span class="nav-text" data-key="theme">Theme</span></button>
+        <button class="mobile-nav-btn" onclick="showPage('dashboard'); toggleMobileMenu()">📊 Dashboard</button>
+        <button class="mobile-nav-btn" onclick="showPage('analytics'); toggleMobileMenu()">📈 Analytics</button>
+        <button class="mobile-nav-btn" onclick="showPage('reports'); toggleMobileMenu()">📋 Reports</button>
+        <button class="mobile-nav-btn" onclick="openCategoryModal(); toggleMobileMenu()">📁 Categories</button>
+        <button class="mobile-nav-btn" onclick="toggleTheme()">🌙 Theme</button>
         <button class="mobile-nav-btn" onclick="toggleLanguage()"><span id="langIcon2">🇬🇧</span> Language</button>
     </div>
 
-    <!-- Main Container -->
     <div class="main-container">
-        <!-- Dashboard Page -->
         <div id="dashboard-page" class="page-content active">
             <div class="container-fluid">
-                <!-- Welcome Section -->
                 <div class="welcome-section">
                     <div>
-                        <h2 id="welcome-title">Welcome Back! 👋</h2>
-                        <p id="welcome-subtitle">Here's your financial overview</p>
+                        <h2>Welcome Back! 👋</h2>
+                        <p>Here's your financial overview</p>
                     </div>
                 </div>
 
-                <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card gradient-blue">
                         <div class="stat-icon">💳</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="stat-1-label">This Month Spending</div>
+                            <div class="stat-label">This Month</div>
                             <div class="stat-value" id="totalExpenses">$0.00</div>
                         </div>
                     </div>
                     <div class="stat-card gradient-green">
                         <div class="stat-icon">💰</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="stat-2-label">Total</div>
+                            <div class="stat-label">Total</div>
                             <div class="stat-value" id="allTimeTotal">$0.00</div>
                         </div>
                     </div>
                     <div class="stat-card gradient-purple">
                         <div class="stat-icon">📅</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="stat-3-label">Daily Avg</div>
+                            <div class="stat-label">Daily Avg</div>
                             <div class="stat-value" id="dailyAverage">$0.00</div>
                         </div>
                     </div>
                     <div class="stat-card gradient-orange">
                         <div class="stat-icon">🎯</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="stat-4-label">Largest</div>
+                            <div class="stat-label">Largest</div>
                             <div class="stat-value" id="largestExpense">$0.00</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Charts Section -->
                 <div class="charts-grid">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 id="chart-category">Category Breakdown</h3>
+                            <h3>Category Breakdown</h3>
                         </div>
                         <div class="chart-body">
                             <canvas id="categoryChart"></canvas>
@@ -109,7 +98,7 @@
                     </div>
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 id="chart-trend">Monthly Trend</h3>
+                            <h3>Monthly Trend</h3>
                         </div>
                         <div class="chart-body">
                             <canvas id="monthlyChart"></canvas>
@@ -117,88 +106,65 @@
                     </div>
                 </div>
 
-                <!-- Dashboard Insights: Top Spending Days -->
-                <div class="table-section">
-                    <div class="table-header">
-                        <h3 id="top-days-title">📅 Top Spending Days</h3>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="expense-table">
-                            <thead>
-                                <tr>
-                                    <th id="table-day">Day</th>
-                                    <th id="table-amount">Total</th>
-                                    <th id="table-avg">Avg</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dashboardSpendingBody">
-                                <tr><td colspan="3" class="text-center">No data</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Add Expense Form -->
                 <div class="add-expense-section">
                     <div class="section-header">
-                        <h3 id="form-title">➕ Add New Expense</h3>
+                        <h3>➕ Add New Expense</h3>
                     </div>
                     <form id="expenseForm">
                         <div class="form-grid">
                             <div class="form-group">
-                                <label id="form-date">Date</label>
+                                <label for="expenseDate">Date</label>
                                 <input type="date" id="expenseDate" class="form-input" required>
                             </div>
                             <div class="form-group">
-                                <label id="form-amount">Amount</label>
+                                <label for="expenseAmount">Amount</label>
                                 <input type="number" min="0" step="0.01" id="expenseAmount" class="form-input" placeholder="0.00" required>
                             </div>
                             <div class="form-group">
-                                <label id="form-currency">Currency</label>
+                                <label for="expenseCurrency">Currency</label>
                                 <select id="expenseCurrency" class="form-input">
                                     <option value="USD">USD ($)</option>
                                     <option value="KHR">Riel (៛)</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label id="form-money-type">Money Type</label>
+                                <label for="expenseMoneyType">Money Type</label>
                                 <select id="expenseMoneyType" class="form-input" required>
-                                    <option value="" id="select-money-type">Select money type</option>
-                                    <option value="Cash" id="money-self">Self Money</option>
-                                    <option value="Bank" id="money-house">House Money</option>
+                                    <option value="">Select type</option>
+                                    <option value="Cash">Self Money</option>
+                                    <option value="Bank">House Money</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label id="form-expense-type">Expense Type</label>
+                                <label for="expenseType">Expense Type</label>
                                 <select id="expenseType" class="form-input" required>
-                                    <option value="" id="select-expense-type">Select expense type</option>
-                                    <option value="Cash" id="money-cash">Cash</option>
-                                    <option value="Bank" id="money-bank">Bank</option>
+                                    <option value="">Select type</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Bank">Bank</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label id="form-category">Category</label>
+                                <label for="expenseCategory">Category</label>
                                 <select id="expenseCategory" class="form-input" required>
-                                    <option value="" id="select-category">Select category</option>
+                                    <option value="">Select category</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label id="form-description">Description</label>
+                            <label for="expenseNote">Description</label>
                             <textarea id="expenseNote" class="form-input" rows="3" placeholder="Optional notes..."></textarea>
                         </div>
-                        <button type="submit" class="btn-submit" id="btn-add-expense">Add Expense</button>
+                        <button type="submit" class="btn-submit">Add Expense</button>
                     </form>
                 </div>
 
-                <!-- Expense Table -->
                 <div class="table-section">
                     <div class="table-header">
-                        <h3 id="table-title">Recent Transactions</h3>
+                        <h3>Recent Transactions</h3>
                         <div class="table-filters">
-                            <input type="text" id="searchExpenses" class="filter-input" placeholder="Search..." data-placeholder="search-placeholder">
+                            <input type="text" id="searchExpenses" class="filter-input" placeholder="Search...">
                             <select id="filterMonth" class="filter-input">
-                                <option value="" id="filter-all-time">All Time</option>
+                                <option value="">All Time</option>
                             </select>
                         </div>
                     </div>
@@ -206,13 +172,13 @@
                         <table class="expense-table">
                             <thead>
                                 <tr>
-                                    <th id="table-date">Date</th>
-                                    <th id="table-amount-col">Amount</th>
-                                    <th id="table-category">Category</th>
-                                    <th id="table-money-type">Money Type</th>
-                                    <th id="table-type">Type</th>
-                                    <th id="table-description">Description</th>
-                                    <th id="table-actions" class="no-print">Actions</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Category</th>
+                                    <th>Money Type</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th class="no-print">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="expenseTableBody">
@@ -236,12 +202,11 @@
             </div>
         </div>
 
-        <!-- Analytics Page -->
         <div id="analytics-page" class="page-content">
             <div class="container-fluid">
                 <div class="welcome-section">
-                    <h2 id="analytics-title">📈 Analytics & Insights</h2>
-                    <p id="analytics-subtitle">Detailed analysis of your spending patterns</p>
+                    <h2>📈 Analytics & Insights</h2>
+                    <p>Detailed analysis of your spending patterns</p>
                 </div>
 
                 <div id="insightsSection" class="insights-grid"></div>
@@ -250,21 +215,21 @@
                     <div class="stat-card gradient-teal">
                         <div class="stat-icon">💸</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="analytics-stat-1">Total Spent</div>
+                            <div class="stat-label">Total Spent</div>
                             <div class="stat-value" id="statTotal">$0.00</div>
                         </div>
                     </div>
                     <div class="stat-card gradient-pink">
                         <div class="stat-icon">📊</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="analytics-stat-2">Median</div>
+                            <div class="stat-label">Median</div>
                             <div class="stat-value" id="statMedian">$0.00</div>
                         </div>
                     </div>
                     <div class="stat-card gradient-indigo">
                         <div class="stat-icon">🎯</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="analytics-stat-3">Expenses</div>
+                            <div class="stat-label">Expenses</div>
                             <div class="stat-value" id="statCount">0</div>
                         </div>
                     </div>
@@ -273,7 +238,7 @@
                 <div class="charts-grid">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 id="chart-money-type">Money Type</h3>
+                            <h3>Money Type</h3>
                         </div>
                         <div class="chart-body">
                             <canvas id="moneyTypeChart"></canvas>
@@ -281,7 +246,7 @@
                     </div>
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 id="chart-12-month">12-Month Trend</h3>
+                            <h3>12-Month Trend</h3>
                         </div>
                         <div class="chart-body">
                             <canvas id="trendChart"></canvas>
@@ -289,7 +254,7 @@
                     </div>
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 id="chart-category-dist">Category Distribution</h3>
+                            <h3>Category Distribution</h3>
                         </div>
                         <div class="chart-body">
                             <canvas id="categoryAnalyticsChart"></canvas>
@@ -297,7 +262,7 @@
                     </div>
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 id="chart-expense-type">Expense Type</h3>
+                            <h3>Expense Type</h3>
                         </div>
                         <div class="chart-body">
                             <canvas id="expenseTypeChart"></canvas>
@@ -307,17 +272,17 @@
 
                 <div class="table-section">
                     <div class="table-header">
-                        <h3 id="monthly-summary-title">Monthly Summary</h3>
+                        <h3>Monthly Summary</h3>
                     </div>
                     <div class="table-responsive">
                         <table class="expense-table">
                             <thead>
                                 <tr>
-                                    <th id="table-month">Month</th>
-                                    <th id="table-total">Total</th>
-                                    <th id="table-avg-day">Avg/Day</th>
-                                    <th id="table-transactions">Transactions</th>
-                                    <th id="table-highest">Highest</th>
+                                    <th>Month</th>
+                                    <th>Total</th>
+                                    <th>Avg/Day</th>
+                                    <th>Transactions</th>
+                                    <th>Highest</th>
                                 </tr>
                             </thead>
                             <tbody id="monthlySummaryBody">
@@ -331,118 +296,73 @@
             </div>
         </div>
 
-        <!-- Reports Page -->
         <div id="reports-page" class="page-content">
             <div class="container-fluid">
                 <div class="welcome-section">
-                    <h2 id="reports-title">📋 Detailed Reports</h2>
-                    <p id="reports-subtitle">Advanced analytics and monthly breakdowns</p>
+                    <h2>📋 Detailed Reports</h2>
+                    <p>Advanced analytics and monthly breakdowns</p>
                 </div>
 
                 <div class="table-section">
                     <div class="table-header">
-                        <h3 id="btn-generate">Generate Report</h3>
+                        <h3>Generate Report</h3>
                     </div>
-                    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
                         <div>
-                            <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.85rem;" id="select-month-label">Select Month</label>
+                            <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.85rem;">Select Month</label>
                             <select id="reportMonth" class="form-input" style="width: 200px;">
-                                <option value="" id="select-month-placeholder">Choose Month...</option>
+                                <option value="">Choose Month...</option>
                             </select>
                         </div>
-                        <button class="action-btn" onclick="generateAndDisplayReport()" style="width: auto;" id="generate-btn">Generate Report</button>
+                        <button class="action-btn" onclick="generateReport()" style="width: auto; align-self: flex-end;">Generate</button>
                     </div>
                 </div>
 
-                <!-- Report Stats -->
                 <div id="reportStats" class="stats-grid" style="display: none;">
                     <div class="stat-card gradient-blue">
                         <div class="stat-icon">💰</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="report-stat-1">Total</div>
+                            <div class="stat-label">Total</div>
                             <div class="stat-value" id="reportTotal">$0.00</div>
                         </div>
                     </div>
                     <div class="stat-card gradient-green">
                         <div class="stat-icon">📊</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="report-stat-2">Average</div>
+                            <div class="stat-label">Average</div>
                             <div class="stat-value" id="reportAvg">$0.00</div>
                         </div>
                     </div>
                     <div class="stat-card gradient-purple">
                         <div class="stat-icon">📈</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="report-stat-3">Count</div>
+                            <div class="stat-label">Count</div>
                             <div class="stat-value" id="reportCount">0</div>
                         </div>
                     </div>
                     <div class="stat-card gradient-orange">
                         <div class="stat-icon">⭐</div>
                         <div class="stat-info">
-                            <div class="stat-label" id="report-stat-4">Highest</div>
+                            <div class="stat-label">Highest</div>
                             <div class="stat-value" id="reportHighest">$0.00</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Category Breakdown -->
-                <div class="chart-card" id="categoryReportSection" style="display: none; margin-bottom: 2rem;">
+                <div class="chart-card" id="categoryReport" style="display: none; margin-bottom: 2rem;">
                     <div class="chart-header">
-                        <h3 id="report-category">Category Breakdown</h3>
-                    </div>
-                    <div style="padding: 1.5rem; max-height: 400px; overflow-y: auto;">
-                        <table class="expense-table">
-                            <thead>
-                                <tr>
-                                    <th id="report-cat-col">Category</th>
-                                    <th id="report-amt-col">Amount</th>
-                                    <th id="report-pct-col">%</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reportCategoryBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Money Type Breakdown -->
-                <div class="chart-card" id="moneyTypeReportSection" style="display: none; margin-bottom: 2rem;">
-                    <div class="chart-header">
-                        <h3 id="report-money-type">Money Type Breakdown</h3>
+                        <h3>Category Breakdown</h3>
                     </div>
                     <div style="padding: 1.5rem;">
                         <table class="expense-table">
                             <thead>
                                 <tr>
-                                    <th id="report-type-col">Type</th>
-                                    <th id="report-amt-col2">Amount</th>
-                                    <th id="report-pct-col2">%</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>%</th>
                                 </tr>
                             </thead>
-                            <tbody id="reportMoneyTypeBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Daily Spending Pattern -->
-                <div class="chart-card" id="dailyPatternSection" style="display: none; margin-bottom: 2rem;">
-                    <div class="chart-header">
-                        <h3 id="report-daily-pattern">📅 Daily Spending Pattern</h3>
-                    </div>
-                    <div style="padding: 1.5rem;">
-                        <table class="expense-table">
-                            <thead>
-                                <tr>
-                                    <th id="report-day-col">Day</th>
-                                    <th id="report-total-col">Total</th>
-                                    <th id="report-count-col">Count</th>
-                                    <th id="report-avg-col">Average</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dailyPatternBody">
-                            </tbody>
+                            <tbody id="reportCategoryBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -450,17 +370,16 @@
         </div>
     </div>
 
-    <!-- Category Modal -->
     <div id="categoryModal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modal-categories">Manage Categories</h5>
+                    <h5 class="modal-title">Manage Categories</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <div class="input-group mb-3">
-                        <input type="text" id="categoryInput" placeholder="New category" class="form-control" data-placeholder="input-new-category">
+                        <input type="text" id="categoryInput" placeholder="New category" class="form-control">
                         <div class="input-group-append">
                             <button class="btn btn-primary" id="addCategory">Add</button>
                         </div>
@@ -471,7 +390,6 @@
         </div>
     </div>
 
-    <!-- Edit Modal -->
     <div class="modal fade" id="editExpenseModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -483,15 +401,15 @@
                     <form id="editExpenseForm">
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label>Date</label>
+                                <label for="editExpenseDate">Date</label>
                                 <input type="date" id="editExpenseDate" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label>Amount</label>
+                                <label for="editExpenseAmount">Amount</label>
                                 <input type="number" min="0" step="0.01" id="editExpenseAmount" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label>Currency</label>
+                                <label for="editExpenseCurrency">Currency</label>
                                 <select id="editExpenseCurrency" class="form-control">
                                     <option value="USD">USD ($)</option>
                                     <option value="KHR">Riel (៛)</option>
@@ -500,18 +418,18 @@
                         </div>
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label>Category</label>
+                                <label for="editExpenseCategory">Category</label>
                                 <select id="editExpenseCategory" class="form-control"></select>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label>Money Type</label>
+                                <label for="editExpenseMoneyType">Money Type</label>
                                 <select id="editExpenseMoneyType" class="form-control">
                                     <option value="Cash">Self Money</option>
                                     <option value="Bank">House Money</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label>Expense Type</label>
+                                <label for="editExpenseType">Expense Type</label>
                                 <select id="editExpenseType" class="form-control">
                                     <option value="Cash">Cash</option>
                                     <option value="Bank">Bank</option>
@@ -519,7 +437,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label>Description</label>
+                            <label for="editExpenseNote">Description</label>
                             <textarea id="editExpenseNote" class="form-control" rows="3"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">Update Expense</button>

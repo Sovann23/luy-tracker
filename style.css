@@ -1,4 +1,4 @@
-/* Modern Colorful Luy Tracker */
+/* Optimized Luy Tracker CSS */
 * {
     margin: 0;
     padding: 0;
@@ -6,11 +6,7 @@
 }
 
 :root {
-    /* Khmer Font Size Control - CHANGE THESE VALUES TO CUSTOMIZE */
-    --khmer-font-size: 1.1em;
-    --khmer-font-weight: 600;
-    
-    /* Modern Color Palette */
+    /* Colors */
     --primary-blue: #3B82F6;
     --primary-green: #10B981;
     --primary-purple: #8B5CF6;
@@ -20,35 +16,22 @@
     --primary-indigo: #6366F1;
     --primary-red: #EF4444;
     
-    /* Backgrounds */
     --bg-main: #F8FAFC;
     --bg-card: #FFFFFF;
     --bg-hover: #F1F5F9;
-    
-    /* Text Colors */
     --text-primary: #1E293B;
     --text-secondary: #64748B;
     --text-light: #94A3B8;
-    
-    /* Borders */
     --border-color: #E2E8F0;
     --border-radius: 16px;
-    
-    /* Shadows */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
     
     /* Category Colors */
-    --cat-1: #FF6B6B;
-    --cat-2: #4ECDC4;
-    --cat-3: #FFE66D;
-    --cat-4: #A8E6CF;
-    --cat-5: #C7CEEA;
-    --cat-6: #FF8B94;
-    --cat-7: #B4A7D6;
-    --cat-8: #95E1D3;
-    --cat-9: #F38181;
+    --cat-1: #FF6B6B; --cat-2: #4ECDC4; --cat-3: #FFE66D;
+    --cat-4: #A8E6CF; --cat-5: #C7CEEA; --cat-6: #FF8B94;
+    --cat-7: #B4A7D6; --cat-8: #95E1D3; --cat-9: #F38181;
     --cat-10: #AA96DA;
 }
 
@@ -59,9 +42,35 @@ body {
     line-height: 1.6;
 }
 
-/* Khmer font styling - EXCLUDE brand elements from Khmer font */
+/* CRITICAL FIX: Khmer Language Support - Keep English bold consistent */
 body[data-language="km"] {
-    font-family: 'Noto Sans Khmer', 'Khmer OS', 'Khmer Sangam MN', sans-serif;
+    /* Mix Khmer and English fonts - English will use system font, Khmer will use Khmer font */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Sans Khmer', 'Khmer OS', sans-serif;
+}
+
+/* Don't override font-family for strong tags - let them inherit from parent */
+body[data-language="km"] strong,
+body[data-language="km"] b {
+    /* Remove font-family override - inherit from body */
+    font-weight: 700;
+}
+
+/* Keep bold weight consistent across all elements */
+body[data-language="km"] .stat-label,
+body[data-language="km"] label {
+    font-weight: 600;
+}
+
+body[data-language="km"] .expense-table thead th {
+    font-weight: 700;
+}
+
+body[data-language="km"] .stat-value,
+body[data-language="km"] .table-header h3,
+body[data-language="km"] .chart-header h3,
+body[data-language="km"] .section-header h3,
+body[data-language="km"] .welcome-section h2 {
+    font-weight: 700;
 }
 
 /* Top Navigation */
@@ -93,9 +102,6 @@ body[data-language="km"] {
     font-size: 0.875rem;
     margin: 0;
 }
-#welcome-title {
-    font-size: 1.5rem; /* Adjust this value as needed */
-}
 
 .nav-actions {
     display: flex;
@@ -109,7 +115,8 @@ body[data-language="km"] {
     color: white;
     padding: 0.75rem 1.5rem;
     border-radius: 12px;
-    font-weight: 500;
+    font-weight: 700;
+    font-size: 1.3rem;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -120,7 +127,6 @@ body[data-language="km"] {
 .nav-btn:hover {
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .nav-btn span {
@@ -151,7 +157,6 @@ body[data-language="km"] {
     flex-direction: column;
     gap: 0.5rem;
     min-width: 200px;
-    pointer-events: auto;
 }
 
 .mobile-menu.active {
@@ -167,8 +172,6 @@ body[data-language="km"] {
     cursor: pointer;
     text-align: left;
     transition: all 0.3s ease;
-    pointer-events: auto;
-    width: 100%;
 }
 
 .mobile-nav-btn:hover {
@@ -236,7 +239,7 @@ body[data-language="km"] {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    min-height: 140px;
+    min-height: 120px;
 }
 
 .stat-card::before {
@@ -279,7 +282,7 @@ body[data-language="km"] {
 }
 
 .stat-label {
-    font-size: 0.95rem;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-secondary);
@@ -294,12 +297,11 @@ body[data-language="km"] {
     margin-bottom: 0.25rem;
 }
 
-
-/* Charts Grid */
+/* FIXED: Charts Grid - Ensures 4 columns on wide screens */
 .charts-grid {
     display: grid;
-    /* Allow smaller cards so more charts fit on wide screens (allows 4 columns on large displays) */
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* CRITICAL FIX: Use explicit minmax with smaller minimum */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -309,6 +311,8 @@ body[data-language="km"] {
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+    /* CRITICAL FIX: Prevent cards from growing too large */
+    max-width: 100%;
 }
 
 .chart-header {
@@ -332,8 +336,8 @@ body[data-language="km"] {
 
 .chart-body {
     padding: 1.5rem;
-    /* Reduced height to better fit multiple charts in one row on deployed pages */
-    height: 280px;
+    /* CRITICAL FIX: Reduced height for better fit */
+    height: 250px;
 }
 
 .chart-body canvas {
@@ -370,14 +374,12 @@ body[data-language="km"] {
 }
 
 .form-group label {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: var(--text-secondary);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    display: block;
-    line-height: 1.4;
 }
 
 .form-input {
@@ -388,7 +390,6 @@ body[data-language="km"] {
     transition: all 0.3s ease;
     background: white;
     color: var(--text-primary);
-    font-family: inherit;
 }
 
 .form-input:focus {
@@ -401,26 +402,15 @@ body[data-language="km"] {
     color: var(--text-light);
 }
 
-/* Fix for select dropdowns - ensure text is fully visible */
 select.form-input {
     appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
     background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8"><path fill="%2364748B" d="M1 1l6 6 6-6"/></svg>');
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 14px;
     padding-right: 3rem;
     cursor: pointer;
-    line-height: 1.5;
     min-height: 48px;
-}
-
-select.form-input option {
-    padding: 0.75rem;
-    background: white;
-    color: var(--text-primary);
-    font-size: 1rem;
 }
 
 textarea.form-input {
@@ -514,14 +504,12 @@ select.filter-input {
     font-weight: 700;
     color: var(--text-secondary);
     border-bottom: 2px solid var(--border-color);
-    line-height: 1.4;
 }
 
 .expense-table tbody td {
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
-    line-height: 1.5;
 }
 
 .expense-table tbody tr {
@@ -567,12 +555,6 @@ select.filter-input {
     gap: 0.5rem;
 }
 
-.action-btns .btn {
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-}
-
 .table-footer {
     padding: 1.5rem;
     border-top: 1px solid var(--border-color);
@@ -590,7 +572,6 @@ select.filter-input {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.25s ease;
-    box-shadow: var(--shadow-sm);
 }
 
 .action-btn:hover {
@@ -600,8 +581,6 @@ select.filter-input {
 
 .action-btn.danger {
     background: linear-gradient(135deg, #EF4444 0%, #F97316 100%);
-    color: white;
-    border: none;
 }
 
 /* Insights Grid */
@@ -662,18 +641,86 @@ select.filter-input {
 
 /* Animations */
 @keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 .expense-row {
     animation: slideIn 0.3s ease;
+}
+
+/* Dark Mode */
+body[data-theme="dark"] {
+    --bg-main: #0F172A;
+    --bg-card: #1E293B;
+    --bg-hover: #334155;
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --text-light: #64748B;
+    --border-color: #334155;
+}
+
+body[data-theme="dark"] .top-navbar {
+    background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+}
+
+body[data-theme="dark"] .nav-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body[data-theme="dark"] .mobile-menu {
+    background: #1E293B;
+    border: 1px solid #334155;
+}
+
+body[data-theme="dark"] .mobile-nav-btn {
+    background: #334155;
+    color: #F1F5F9;
+}
+
+body[data-theme="dark"] .welcome-section {
+    background: linear-gradient(135deg, #1E40AF 0%, #0F766E 100%);
+}
+
+body[data-theme="dark"] .stat-card,
+body[data-theme="dark"] .chart-card,
+body[data-theme="dark"] .add-expense-section,
+body[data-theme="dark"] .table-section {
+    background: #1E293B;
+    border-color: #334155;
+}
+
+body[data-theme="dark"] .form-input,
+body[data-theme="dark"] .filter-input {
+    background: #0F172A;
+    border-color: #334155;
+    color: #F1F5F9;
+}
+
+body[data-theme="dark"] select.form-input,
+body[data-theme="dark"] select.filter-input {
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8"><path fill="%2394A3B8" d="M1 1l6 6 6-6"/></svg>');
+    background-color: #0F172A;
+}
+
+body[data-theme="dark"] .expense-table thead th {
+    background: #0F172A;
+    color: #94A3B8;
+}
+
+body[data-theme="dark"] .expense-table tbody td {
+    color: #F1F5F9;
+}
+
+body[data-theme="dark"] .modal-content {
+    background: #1E293B;
+    color: #F1F5F9;
+}
+
+body[data-theme="dark"] .list-group-item {
+    background: #334155;
+    color: #F1F5F9;
 }
 
 /* Responsive Design */
@@ -722,353 +769,13 @@ select.filter-input {
     }
 }
 
-/* Dark Mode Styles */
-body[data-theme="dark"] {
-    --bg-main: #0F172A;
-    --bg-card: #1E293B;
-    --bg-hover: #334155;
-    
-    --text-primary: #F1F5F9;
-    --text-secondary: #94A3B8;
-    --text-light: #64748B;
-    
-    --border-color: #334155;
-}
-
-body[data-theme="dark"] .top-navbar {
-    background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
-    border-bottom: 1px solid #334155;
-}
-
-body[data-theme="dark"] .nav-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-body[data-theme="dark"] .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-body[data-theme="dark"] .mobile-menu {
-    background: #1E293B;
-    border: 1px solid #334155;
-}
-
-body[data-theme="dark"] .mobile-nav-btn {
-    background: #334155;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] .mobile-nav-btn:hover {
-    background: var(--primary-blue);
-}
-
-body[data-theme="dark"] .welcome-section {
-    background: linear-gradient(135deg, #1E40AF 0%, #0F766E 100%);
-}
-
-body[data-theme="dark"] .stat-card {
-    background: #1E293B;
-    border: 1px solid #334155;
-}
-
-body[data-theme="dark"] .stat-icon {
-    background: #334155;
-}
-
-body[data-theme="dark"] .chart-card {
-    background: #1E293B;
-    border: 1px solid #334155;
-}
-
-body[data-theme="dark"] .chart-header {
-    border-bottom-color: #334155;
-}
-
-body[data-theme="dark"] .add-expense-section {
-    background: #1E293B;
-    border-color: var(--primary-blue);
-}
-
-body[data-theme="dark"] .form-input {
-    background: #0F172A;
-    border-color: #334155;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] .form-input:focus {
-    background: #1E293B;
-    border-color: var(--primary-blue);
-}
-
-body[data-theme="dark"] .form-input::placeholder {
-    color: #64748B;
-}
-
-body[data-theme="dark"] select.form-input {
-    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8"><path fill="%2394A3B8" d="M1 1l6 6 6-6"/></svg>');
-    background-color: #0F172A;
-}
-
-body[data-theme="dark"] select.form-input option {
-    background: #1E293B;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] .table-section {
-    background: #1E293B;
-    border: 1px solid #334155;
-}
-
-body[data-theme="dark"] .table-header {
-    border-bottom-color: #334155;
-}
-
-body[data-theme="dark"] .filter-input {
-    background: #0F172A;
-    border-color: #334155;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] select.filter-input {
-    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8"><path fill="%2394A3B8" d="M1 1l6 6 6-6"/></svg>');
-    background-color: #0F172A;
-}
-
-body[data-theme="dark"] .expense-table thead th {
-    background: #0F172A;
-    color: #94A3B8;
-    border-bottom-color: #334155;
-}
-
-body[data-theme="dark"] .expense-table tbody td {
-    border-bottom-color: #334155;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] .expense-table tbody tr:hover {
-    background: #334155;
-}
-
-body[data-theme="dark"] .action-btn {
-    background: #334155;
-    border-color: #475569;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] .action-btn:hover {
-    background: var(--primary-blue);
-    border-color: var(--primary-blue);
-}
-
-body[data-theme="dark"] .insight-card.warning {
-    background: rgba(239, 68, 68, 0.15);
-    color: #FCA5A5;
-}
-
-body[data-theme="dark"] .insight-card.caution {
-    background: rgba(245, 158, 11, 0.15);
-    color: #FCD34D;
-}
-
-body[data-theme="dark"] .insight-card.info {
-    background: rgba(20, 184, 166, 0.15);
-    color: #5EEAD4;
-}
-
-body[data-theme="dark"] .modal-content {
-    background: #1E293B;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] .modal-body .form-control {
-    background: #0F172A;
-    border-color: #334155;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] .modal-body .form-control:focus {
-    background: #1E293B;
-    border-color: var(--primary-blue);
-}
-
-body[data-theme="dark"] .list-group-item {
-    background: #334155;
-    border-color: #475569;
-    color: #F1F5F9;
-}
-
-body[data-theme="dark"] .empty-state {
-    color: #64748B;
-}
-
-/* Smooth theme transition */
-body,
-.top-navbar,
-.stat-card,
-.chart-card,
-.add-expense-section,
-/* Smooth transitions for all content */
-body {
-    transition: opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-}
-
-body * {
-    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Language transition fade */
-body.language-switching {
-    opacity: 0.95;
-}
-
-.table-section,
-.form-input,
-.action-btn,
-.modal-content {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Khmer text styling - Use consistent sizing to prevent layout shifts */
-body[data-language="km"] {
-    font-family: 'Noto Sans Khmer', 'Khmer OS', 'Khmer Sangam MN', sans-serif;
-}
-
-/* Apply Khmer sizing uniformly without breaking layout */
-body[data-language="km"] .stat-label,
-body[data-language="km"] .stat-value,
-body[data-language="km"] .stat-card,
-body[data-language="km"] label,
-body[data-language="km"] .form-group label,
-body[data-language="km"] .table-header h3,
-body[data-language="km"] .chart-header h3,
-body[data-language="km"] .section-header h3,
-body[data-language="km"] .welcome-section h2,
-body[data-language="km"] .welcome-section p,
-body[data-language="km"] .expense-table tbody td,
-body[data-language="km"] .expense-table thead th,
-body[data-language="km"] button,
-body[data-language="km"] .action-btn,
-body[data-language="km"] .btn-submit {
-    font-family: 'Noto Sans Khmer', 'Khmer OS', 'Khmer Sangam MN', sans-serif;
-    font-weight: var(--khmer-font-weight);
-}
-
-/* Maintain consistent line heights to prevent text overflow */
-body[data-language="km"] .stat-label {
-    line-height: 1.4;
-}
-
-body[data-language="km"] .stat-value {
-    line-height: 1.4;
-}
-
-body[data-language="km"] .form-group label {
-    line-height: 1.4;
-}
-
-body[data-language="km"] .expense-table tbody td,
-body[data-language="km"] .expense-table thead th {
-    line-height: 1.5;
-    padding: 1.25rem 1.5rem;
-}
-
-/* Smooth hover transitions on interactive elements */
-.stat-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-}
-
-.chart-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.chart-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.action-btn {
-    transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.expense-table tbody tr {
-    transition: background 0.2s ease;
-}
-
-.expense-table tbody tr:hover {
-    background: var(--bg-hover);
-}
-
 @media print {
-    /* Hide navigation and interactive UI */
     .top-navbar,
     .mobile-menu,
-    .mobile-menu-btn,
-    .nav-actions,
+    .add-expense-section,
     .table-footer,
     .action-btns,
-    .btn-submit,
-    .filter-input,
-    .table-filters,
-    .add-expense-section,
     .no-print {
         display: none !important;
-    }
-
-    /* Center and style the four stat cards for the PDF */
-    .stats-grid {
-        display: flex !important;
-        justify-content: center !important;
-        gap: 1rem !important;
-        flex-wrap: nowrap !important;
-    }
-
-    .stat-card {
-        display: inline-block !important;
-        width: 23% !important;
-        box-shadow: none !important;
-        border: 1px solid #d1d5db !important;
-        background: #ffffff !important;
-        color: #111827 !important;
-        page-break-inside: avoid;
-    }
-
-    /* Remove border collapse issues and ensure full width table */
-    .table-section, .chart-card, .charts-grid, .insights-grid {
-        box-shadow: none !important;
-        border: none !important;
-        background: transparent !important;
-    }
-
-    /* Hide action column in tables */
-    th.no-print, td.no-print {
-        display: none !important;
-    }
-
-    /* Ensure tables print fully */
-    .expense-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-    }
-
-    /* Improve typography for print */
-    body {
-        background: #ffffff !important;
-        color: #111827 !important;
-    }
-
-    /* Prevent page breaks inside rows */
-    .expense-table tbody tr {
-        page-break-inside: avoid;
     }
 }
