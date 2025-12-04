@@ -45,7 +45,7 @@ const translations = {
         dashboard: 'ផ្ទាំងគ្រប់គ្រង', analyticsNav: 'វិភាគ', reportsNav: 'របាយការណ៍', categories: 'ប្រភេទ',
         // CORE TEXT
         welcome: 'សូមស្វាគមន៍! 👋', welcomeSub: 'នេះគឺជាការសង្ខេបហិរញ្ញវត្ថុរបស់អ្នក', thisMonth: 'ខែនេះ',
-        total: 'សរុប', dailyAvg: 'មធ្យមភាគក្នុងមួយថ្ងៃ', largest: 'ធំបំផុត', categoryBreakdown: 'ការបែងចែកតាមប្រភេទ',
+        total: 'សរុប', dailyAvg: 'ការចំណាយជាមធ្យមក្នុង១ថ្ងៃ', largest: 'ធំបំផុត', categoryBreakdown: 'ការបែងចែកតាមប្រភេទ',
         monthlyTrend: 'ទំនោរប្រចាំខែ', addExpense: '➕ បន្ថែមការចំណាយថ្មី', date: 'កាលបរិច្ឆេទ', amount: 'ចំនួនទឹកប្រាក់',
         currency: 'រូបិយប័ណ្ណ', moneyType: 'ប្រភេទសាច់ប្រាក់', expenseType: 'ប្រភេទការចំណាយ', category: 'ប្រភេទ',
         description: 'ការពិពណ៌នា', selectType: 'ជ្រើសរើសប្រភេទ', selfMoney: 'ប្រាក់ផ្ទាល់ខ្លួន', houseMoney: 'ប្រាក់ផ្ទះ',
@@ -57,7 +57,7 @@ const translations = {
         expenseTypeChart: 'ប្រភេទការចំណាយ', monthlySummary: 'សង្ខេបប្រចាំខែ', month: 'ខែ', avgDay: 'មធ្យម/ថ្ងៃ',
         transactions: 'ប្រតិបត្តិការ', highest: 'ខ្ពស់បំផុត', reports: '📋 របាយការណ៍លម្អិត', reportsSub: 'ការវិភាគកម្រិតខ្ពស់ និងការបែងចែកប្រចាំខែ',
         generateReport: 'បង្កើតរបាយការណ៍', selectMonth: 'ជ្រើសរើសខែ', chooseMonth: 'ជ្រើសរើសខែ...', generate: 'បង្កើត',
-        average: 'មធ្យមភាគ', count: 'ចំនួន', categoryBreakdownReport: 'ការបែងចែកតាមប្រភេទ', manageCategories: 'គ្រប់គ្រងប្រភេទ',
+        average: 'ការចំណាយជាមធ្យម', count: 'ចំនួនការចំណាយ', categoryBreakdownReport: 'ការបែងចែកតាមប្រភេទ', manageCategories: 'គ្រប់គ្រងប្រភេទ',
         newCategory: 'ប្រភេទថ្មី', add: 'បន្ថែម', editExpense: 'កែសម្រួល', deleteBtn: 'លុប', updateExpense: 'ធ្វើបច្ចុប្បន្នភាពការចំណាយ',
         imported: 'នាំចូល', expense: 'ការចំណាយ',
         // Table headers for Dashboard/Edit
@@ -354,12 +354,15 @@ function applyLanguage() {
     // Refresh the table and summary to re-render dynamic content with new language
     updateExpenseTable();
     updateMonthlySummaryTable();
-    // Chart labels need update only if analytic page is active
+    // Chart labels need update only if analytic page is active AND charts are initialized
     if (document.getElementById('analytics-page').classList.contains('active') || document.getElementById('dashboard-page').classList.contains('active')) {
         updateCharts();
-        updateAnalytics();
+        // Only update analytics if the charts have been initialized
+        if (analyticsInitialized) {
+            updateAnalytics();
+        }
     }
-}
+    }
 
 function applySavedLanguage() {
     const saved = localStorage.getItem('language') || 'en';
@@ -826,45 +829,123 @@ function downloadPDF() {
     window.print();
 }
 
+
 // FIX: Import function
 function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Get translations for both languages for robust mapping
+    const t = translations[currentLanguage]; 
+    const t_en = translations['en'];
+    const t_km = translations['km'];
+
     const reader = new FileReader();
     reader.onload = function(ev) {
         const data = new Uint8Array(ev.target.result);
+        // Assumes the XLSX library (sheetjs) is loaded in the HTML
         const wb = XLSX.read(data, { type: 'array', cellDates: true });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(ws);
-        const t = translations[currentLanguage];
+        
+        if (json.length === 0) {
+            alert('⚠️ File is empty!');
+            return;
+        }
 
+        // --- Step 1: Detect Column Headers (Support both English and Khmer) ---
+        const firstRow = json[0];
+        const headers = Object.keys(firstRow);
+        
+        // Create a mapping object to find the correct column regardless of language
+        const findColumn = (enKey, kmKey) => {
+            // Check if English or Khmer header exists
+            if (firstRow[enKey] !== undefined) return enKey;
+            if (firstRow[kmKey] !== undefined) return kmKey;
+            // Fallback: check if any header contains similar text (case-insensitive)
+            const found = headers.find(h => 
+                h.toLowerCase().includes(enKey.toLowerCase()) ||
+                h.includes(kmKey)
+            );
+            return found || enKey; // Return English key as final fallback
+        };
+
+        // Detect actual column names used in the spreadsheet
+        const dateCol = findColumn('Date', t_km.tableDate);
+        const amountCol = findColumn('Amount', t_km.tableAmount);
+        const currencyCol = findColumn('Currency', t_km.currency);
+        const categoryCol = findColumn('Category', t_km.tableCategory);
+        const moneyTypeCol = findColumn('Money Type', t_km.tableMoneyType);
+        const expenseTypeCol = findColumn('Type', t_km.tableType);
+        const descCol = findColumn('Description', t_km.tableDescription);
+        
+        // --- Step 2: Define Translation Mapping Logic (Enhanced for Khmer) ---
         try {
-            const newExp = json.map(row => {
-                const mapType = (val) => {
-                    const lower = String(val).toLowerCase().trim();
-                    // Maps translated display names back to internal keys ('Cash'/'Bank')
-                    if (lower.includes('bank') || lower.includes('house money') || lower.includes(t.bank.toLowerCase())) return 'Bank';
-                    return 'Cash'; 
-                };
+            const mapType = (val, typeKey) => {
+                const original = String(val || '').trim();
+                const lower = original.toLowerCase();
+                if (!original) return 'Cash'; // Default if cell is empty
 
-                if (!row.Date || typeof row.Amount === 'undefined' || !row.Category) throw new Error('Invalid data: Missing Date, Amount, or Category');
+                // Money Type (Internal keys: Cash/Bank, Display: Self Money/House Money)
+                if (typeKey === 'money') {
+                    // Check for House Money in both languages
+                    if (lower.includes(t_en.houseMoney.toLowerCase()) || 
+                        original.includes(t_km.houseMoney) ||
+                        lower.includes('house') ||
+                        lower.includes('bank')) {
+                        return 'Bank'; 
+                    }
+                    // Default to Self Money
+                    return 'Cash'; 
+                }
+
+                // Expense Type (Internal keys: Cash/Bank)
+                if (typeKey === 'expense') {
+                    // Check for Bank in both languages
+                    if (lower.includes(t_en.bank.toLowerCase()) || 
+                        original.includes(t_km.bank) ||
+                        lower.includes('bank')) {
+                        return 'Bank';
+                    }
+                    // Default to Cash
+                    return 'Cash'; 
+                }
+                
+                return 'Cash'; // Default fallback
+            };
+
+            // --- Step 3: Process JSON Data ---
+            const newExp = json.map(row => {
+                // Ensure required fields exist
+                if (!row[dateCol] || typeof row[amountCol] === 'undefined' || !row[categoryCol]) {
+                     console.warn('Skipping row due to missing required data:', row);
+                     return null; 
+                }
                 
                 return {
-                    date: row.Date instanceof Date ? row.Date.toISOString().split('T')[0] : String(row.Date).split('T')[0],
-                    amount: parseFloat(row.Amount),
-                    currency: row.Currency || 'USD',
-                    category: String(row.Category),
-                    moneyType: mapType(row['Money Type'] || 'Cash'),
-                    expenseType: mapType(row['Expense Type'] || 'Cash'),
-                    note: String(row.Description || ''),
+                    // Normalize Date: XLSX dates can be numbers or Date objects
+                    date: row[dateCol] instanceof Date 
+                        ? row[dateCol].toISOString().split('T')[0] 
+                        : String(row[dateCol]).split('T')[0],
+                        
+                    amount: parseFloat(row[amountCol]),
+                    currency: row[currencyCol] || 'USD',
+                    category: String(row[categoryCol]),
+                    
+                    // Use the dynamically detected keys and mapping function
+                    moneyType: mapType(row[moneyTypeCol], 'money'),
+                    expenseType: mapType(row[expenseTypeCol], 'expense'),
+                    
+                    note: String(row[descCol] || ''),
                     id: Date.now() + Math.random()
                 };
             }).filter(e => e !== null && !isNaN(e.amount)); // Filter out null/invalid entries
 
+            // --- Step 4: Finalize Import ---
             if (newExp.length > 0) {
                 expenses.push(...newExp);
-                // Also update categories if new ones were imported
+                
+                // Update categories list with any newly imported categories
                 const newCategories = [...new Set(newExp.map(e => e.category))];
                 newCategories.forEach(c => {
                     if (!categories.includes(c)) categories.push(c);
@@ -877,7 +958,7 @@ function importData(e) {
                 updateCharts();
                 alert(`✅ ${t.imported} ${newExp.length} ${t.expense}(s)!`);
             } else {
-                alert(`⚠️ No valid expenses found in the imported file.`);
+                alert(`⚠️ No valid expenses found in the imported file.`); 
             }
         } catch (err) {
             alert(`❌ Error processing file: ${err.message}. Ensure it is a valid CSV/Excel file.`);
