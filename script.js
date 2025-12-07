@@ -1,5 +1,4 @@
-// Optimized Luy Tracker JavaScript - FIXED VERSION
-
+// --- GLOBAL VARIABLES & DATA ---
 let expenses = [];
 let currentEditIndex = null;
 let categories = ['Food', 'Transport', 'Utilities', 'Entertainment', 'Health', 'Shopping', 'Education', 'Travel', 'Others'];
@@ -12,12 +11,10 @@ const categoryColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A8E6CF', '#C7CEEA', '
 let categoryChart, monthlyChart, moneyTypeChart, trendChart, categoryAnalyticsChart, expenseTypeChart;
 let analyticsInitialized = false;
 
-// Simple translations - NOW INCLUDING NAVIGATION KEYS
+// Translations
 const translations = {
     en: {
-        // NAV BAR (New additions)
         dashboard: 'Dashboard', analyticsNav: 'Analytics', reportsNav: 'Reports', categories: 'Categories',
-        // CORE TEXT
         welcome: 'Welcome Back! 👋', welcomeSub: "Here's your financial overview", thisMonth: 'This Month',
         total: 'Total', dailyAvg: 'Daily Avg', largest: 'Largest', categoryBreakdown: 'Category Breakdown',
         monthlyTrend: 'Monthly Trend', addExpense: '➕ Add New Expense', date: 'Date', amount: 'Amount',
@@ -34,16 +31,13 @@ const translations = {
         average: 'Average', count: 'Count', categoryBreakdownReport: 'Category Breakdown', manageCategories: 'Manage Categories',
         newCategory: 'New category', add: 'Add', editExpense: 'Edit', deleteBtn: 'Delete', updateExpense: 'Update Expense',
         imported: 'Imported', expense: 'expense',
-        // Table headers for Dashboard/Edit
+        status: 'Status', paid: 'Paid', needRefund: 'Need Refund', pending: 'Pending',
         tableDate: 'Date', tableAmount: 'Amount', tableCategory: 'Category', tableMoneyType: 'Money Type',
-        tableType: 'Type', tableDescription: 'Description', tableActions: 'Actions',
-        // Analytics Table Headers
+        tableType: 'Type', tableDescription: 'Description', tableStatus: 'Status', tableActions: 'Actions',
         tableMonth: 'Month', tableTotal: 'Total', tableAvgDay: 'Avg/Day', tableTrans: 'Transactions', tableHighest: 'Highest'
     },
     km: {
-        // NAV BAR (New additions)
         dashboard: 'ផ្ទាំងគ្រប់គ្រង', analyticsNav: 'វិភាគ', reportsNav: 'របាយការណ៍', categories: 'ប្រភេទ',
-        // CORE TEXT
         welcome: 'សូមស្វាគមន៍! 👋', welcomeSub: 'នេះគឺជាការសង្ខេបហិរញ្ញវត្ថុរបស់អ្នក', thisMonth: 'ខែនេះ',
         total: 'សរុប', dailyAvg: 'ការចំណាយជាមធ្យមក្នុង១ថ្ងៃ', largest: 'ធំបំផុត', categoryBreakdown: 'ការបែងចែកតាមប្រភេទ',
         monthlyTrend: 'ទំនោរប្រចាំខែ', addExpense: '➕ បន្ថែមការចំណាយថ្មី', date: 'កាលបរិច្ឆេទ', amount: 'ចំនួនទឹកប្រាក់',
@@ -60,10 +54,9 @@ const translations = {
         average: 'ការចំណាយជាមធ្យម', count: 'ចំនួនការចំណាយ', categoryBreakdownReport: 'ការបែងចែកតាមប្រភេទ', manageCategories: 'គ្រប់គ្រងប្រភេទ',
         newCategory: 'ប្រភេទថ្មី', add: 'បន្ថែម', editExpense: 'កែសម្រួល', deleteBtn: 'លុប', updateExpense: 'ធ្វើបច្ចុប្បន្នភាពការចំណាយ',
         imported: 'នាំចូល', expense: 'ការចំណាយ',
-        // Table headers for Dashboard/Edit
+        status: 'ស្ថានភាព', paid: 'បានបង់', needRefund: 'ត្រូវសងវិញ', pending: 'កំពុងរង់ចាំ',
         tableDate: 'កាលបរិច្ឆេទ', tableAmount: 'ចំនួនទឹកប្រាក់', tableCategory: 'ប្រភេទ', tableMoneyType: 'ប្រភេទសាច់ប្រាក់',
-        tableType: 'ប្រភេទ', tableDescription: 'ការពិពណ៌នា', tableActions: 'សកម្មភាព',
-        // Analytics Table Headers
+        tableType: 'ប្រភេទ', tableDescription: 'ការពិពណ៌នា', tableStatus: 'ស្ថានភាព', tableActions: 'សកម្មភាព',
         tableMonth: 'ខែ', tableTotal: 'សរុប', tableAvgDay: 'មធ្យម/ថ្ងៃ', tableTrans: 'ប្រតិបត្តិការ', tableHighest: 'ខ្ពស់បំផុត'
     }
 };
@@ -78,13 +71,12 @@ document.addEventListener("DOMContentLoaded", function() {
     initializeCharts();
     setupEventListeners();
     updateReportMonths();
-    applyLanguage(); // This must be called at the end
+    applyLanguage();
 });
 
 function setupEventListeners() {
-    // FIX: Changed "updateExpense" to "editExpense" (more descriptive)
     document.getElementById("expenseForm").addEventListener("submit", addExpense);
-    document.getElementById("editExpenseForm").addEventListener("submit", updateExpense); 
+    document.getElementById("editExpenseForm").addEventListener("submit", updateExpense);
     document.getElementById("filterMonth").addEventListener("change", updateCharts);
     document.getElementById("filterMonth").addEventListener("change", updateExpenseTable);
     document.getElementById("searchExpenses").addEventListener("input", updateExpenseTable);
@@ -93,7 +85,6 @@ function setupEventListeners() {
     document.getElementById("importData").addEventListener("click", () => document.getElementById('importFile').click());
     document.getElementById("importFile").addEventListener("change", importData);
     
-    // Category Modal Listeners
     const categoryInput = document.getElementById("categoryInput");
     const addCategoryBtn = document.getElementById("addCategory");
     if(categoryInput && addCategoryBtn) {
@@ -135,16 +126,13 @@ function saveAllData() {
     localStorage.setItem("categories", JSON.stringify(categories));
 }
 
-// FIX: This function was missing in the second half.
 function convertCurrency(amt, from, to) {
     if (from === to) return amt;
     const rateFrom = exchangeRates[from] || 1;
     const rateTo = exchangeRates[to] || 1;
-    // Conversion: (Amount / RateFrom) * RateTo
-    return (amt / rateFrom) * rateTo; 
+    return (amt / rateFrom) * rateTo;
 }
 
-// FIX: This function was missing in the second half.
 function addExpense(e) {
     e.preventDefault();
     const amountInput = document.getElementById("expenseAmount");
@@ -159,12 +147,14 @@ function addExpense(e) {
         category: categoryInput.value,
         moneyType: document.getElementById("expenseMoneyType").value,
         expenseType: document.getElementById("expenseType").value,
+        // Status is correctly saved on initial add
+        status: document.getElementById("expenseStatus").value, 
         note: document.getElementById("expenseNote").value,
-        id: Date.now() + Math.random() // Unique ID
+        id: Date.now() + Math.random()
     };
 
     expenses.push(newExpense);
-    saveAllData(); // FIX: Now ensures persistence
+    saveAllData();
     
     document.getElementById("expenseForm").reset();
     initializeDate();
@@ -196,48 +186,23 @@ function applyLanguage() {
     const t = translations[currentLanguage];
     document.body.setAttribute('data-language', currentLanguage);
 
-    // 1. Static Text Updates
     const updates = {
-        // FIX: Navigation Bar Translations (using IDs from suggested HTML update)
-        '#navDashboard': t.dashboard,
-        '#navAnalytics': t.analyticsNav,
-        '#navReports': t.reportsNav,
-        '#navCategories': t.categories,
-        
-        // --- Dashboard Page ---
-        '#dashboard-page .welcome-section h2': t.welcome,
-        '#dashboard-page .welcome-section p': t.welcomeSub,
-        '.stats-grid .stat-card:nth-child(1) .stat-label': t.thisMonth,
-        '.stats-grid .stat-card:nth-child(2) .stat-label': t.total,
-        '.stats-grid .stat-card:nth-child(3) .stat-label': t.dailyAvg,
-        '.stats-grid .stat-card:nth-child(4) .stat-label': t.largest,
-        '.charts-grid .chart-card:nth-child(1) h3': t.categoryBreakdown,
-        '.charts-grid .chart-card:nth-child(2) h3': t.monthlyTrend,
-        '.add-expense-section h3': t.addExpense,
-        '.add-expense-section .btn-submit': t.addExpenseBtn,
-        '.table-section .table-header h3': t.recentTrans,
-
-        // Form Labels
-        'label[for="expenseDate"]': t.date,
-        'label[for="expenseAmount"]': t.amount,
-        'label[for="expenseCurrency"]': t.currency,
-        'label[for="expenseMoneyType"]': t.moneyType,
-        'label[for="expenseType"]': t.expenseType,
-        'label[for="expenseCategory"]': t.category,
-        'label[for="expenseNote"]': t.description,
-        
-        // Expense Table Headers (Dashboard)
-        '#dashboard-page .expense-table thead th:nth-child(1)': t.tableDate,
-        '#dashboard-page .expense-table thead th:nth-child(2)': t.tableAmount,
-        '#dashboard-page .expense-table thead th:nth-child(3)': t.tableCategory,
-        '#dashboard-page .expense-table thead th:nth-child(4)': t.tableMoneyType,
-        '#dashboard-page .expense-table thead th:nth-child(5)': t.tableType,
-        '#dashboard-page .expense-table thead th:nth-child(6)': t.tableDescription,
-        '#dashboard-page .expense-table thead th:nth-child(7)': t.tableActions,
-        
-        // --- Analytics Page ---
-        '#analytics-page .welcome-section h2': t.analytics,
-        '#analytics-page .welcome-section p': t.analyticsSub,
+        '#navDashboard': t.dashboard, '#navAnalytics': t.analyticsNav, '#navReports': t.reportsNav, '#navCategories': t.categories,
+        '#dashboard-page .welcome-section h2': t.welcome, '#dashboard-page .welcome-section p': t.welcomeSub,
+        '.stats-grid .stat-card:nth-child(1) .stat-label': t.thisMonth, '.stats-grid .stat-card:nth-child(2) .stat-label': t.total,
+        '.stats-grid .stat-card:nth-child(3) .stat-label': t.dailyAvg, '.stats-grid .stat-card:nth-child(4) .stat-label': t.largest,
+        '.charts-grid .chart-card:nth-child(1) h3': t.categoryBreakdown, '.charts-grid .chart-card:nth-child(2) h3': t.monthlyTrend,
+        '.add-expense-section h3': t.addExpense, '.add-expense-section .btn-submit': t.addExpenseBtn,
+        'label[for="expenseDate"]': t.date, 'label[for="expenseAmount"]': t.amount,
+        'label[for="expenseCurrency"]': t.currency, 'label[for="expenseMoneyType"]': t.moneyType,
+        'label[for="expenseType"]': t.expenseType, 'label[for="expenseCategory"]': t.category,
+        'label[for="expenseNote"]': t.description, 'label[for="expenseStatus"]': t.status,
+        '.table-section .table-header h3': t.recentTrans, 
+        '#dashboard-page .expense-table thead th:nth-child(1)': t.tableDate, '#dashboard-page .expense-table thead th:nth-child(2)': t.tableAmount,
+        '#dashboard-page .expense-table thead th:nth-child(3)': t.tableCategory, '#dashboard-page .expense-table thead th:nth-child(4)': t.tableMoneyType,
+        '#dashboard-page .expense-table thead th:nth-child(5)': t.tableType, '#dashboard-page .expense-table thead th:nth-child(6)': t.tableDescription,
+        '#dashboard-page .expense-table thead th:nth-child(7)': t.tableStatus, '#dashboard-page .expense-table thead th:nth-child(8)': t.tableActions,
+        '#analytics-page .welcome-section h2': t.analytics, '#analytics-page .welcome-section p': t.analyticsSub,
         '#analytics-page .stats-grid .stat-card:nth-child(1) .stat-label': t.totalSpent,
         '#analytics-page .stats-grid .stat-card:nth-child(2) .stat-label': t.median,
         '#analytics-page .stats-grid .stat-card:nth-child(3) .stat-label': t.expenses,
@@ -251,37 +216,21 @@ function applyLanguage() {
         '#analytics-page .expense-table thead th:nth-child(3)': t.tableAvgDay,
         '#analytics-page .expense-table thead th:nth-child(4)': t.tableTrans,
         '#analytics-page .expense-table thead th:nth-child(5)': t.tableHighest,
-
-        // --- Reports Page ---
-        '#reports-page .welcome-section h2': t.reports,
-        '#reports-page .welcome-section p': t.reportsSub,
-        '#reports-page .table-section .table-header h3': t.generateReport,
-        '#reports-page label': t.selectMonth, 
-        '#reports-page .action-btn': t.generate,
-        '#reportStats .stat-card:nth-child(1) .stat-label': t.total,
-        '#reportStats .stat-card:nth-child(2) .stat-label': t.average,
-        '#reportStats .stat-card:nth-child(3) .stat-label': t.count,
-        '#reportStats .stat-card:nth-child(4) .stat-label': t.highest,
-        '#categoryReport h3': t.categoryBreakdownReport,
-        
-        // --- Modals ---
-        '#categoryModal .modal-title': t.manageCategories,
-        '#categoryModal #addCategory': t.add,
-        '#editExpenseModal .modal-title': t.editExpense,
-        '#editExpenseModal button[type="submit"]': t.updateExpense,
-        'label[for="editExpenseDate"]': t.date,
-        'label[for="editExpenseAmount"]': t.amount,
-        'label[for="editExpenseCurrency"]': t.currency,
-        'label[for="editExpenseCategory"]': t.category,
-        'label[for="editExpenseMoneyType"]': t.moneyType,
-        'label[for="editExpenseType"]': t.expenseType,
-        'label[for="editExpenseNote"]': t.description,
-        
+        '#reports-page .welcome-section h2': t.reports, '#reports-page .welcome-section p': t.reportsSub,
+        '#reports-page .table-section .table-header h3': t.generateReport, '#reports-page label': t.selectMonth,
+        '#reports-page .action-btn': t.generate, '#reportStats .stat-card:nth-child(1) .stat-label': t.total,
+        '#reportStats .stat-card:nth-child(2) .stat-label': t.average, '#reportStats .stat-card:nth-child(3) .stat-label': t.count,
+        '#reportStats .stat-card:nth-child(4) .stat-label': t.highest, '#categoryReport h3': t.categoryBreakdownReport,
+        '#categoryModal .modal-title': t.manageCategories, '#categoryModal #addCategory': t.add,
+        '#editExpenseModal .modal-title': t.editExpense, '#editExpenseModal button[type="submit"]': t.updateExpense,
+        'label[for="editExpenseDate"]': t.date, 'label[for="editExpenseAmount"]': t.amount,
+        'label[for="editExpenseCurrency"]': t.currency, 'label[for="editExpenseCategory"]': t.category,
+        'label[for="editExpenseMoneyType"]': t.moneyType, 'label[for="editExpenseType"]': t.expenseType,
+        'label[for="editExpenseNote"]': t.description, 'label[for="editExpenseStatus"]': t.status
     };
 
-    // Apply static text updates
     Object.entries(updates).forEach(([selector, text]) => {
-        document.querySelectorAll(selector).forEach(el => { // Use querySelectorAll to catch all mobile/desktop instances
+        document.querySelectorAll(selector).forEach(el => {
             if (el) {
                 if (el.tagName === 'INPUT' && el.type === 'text') el.placeholder = text;
                 else if (el.tagName !== 'SELECT') el.textContent = text;
@@ -289,35 +238,27 @@ function applyLanguage() {
         });
     });
     
-    // 2. Dynamic Update for SELECT Options
+    // Update text content for SELECT options (Money Type, Expense Type)
+    const typeSelects = {
+        'expenseMoneyType': { 'Cash': t.selfMoney, 'Bank': t.houseMoney, '': t.selectType },
+        'editExpenseMoneyType': { 'Cash': t.selfMoney, 'Bank': t.houseMoney, '': t.selectType },
+        'expenseType': { 'Cash': t.cash, 'Bank': t.bank, '': t.selectType },
+        'editExpenseType': { 'Cash': t.cash, 'Bank': t.bank, '': t.selectType },
+        'expenseStatus': { 'Paid': `🟢 ${t.paid}`, 'Need Refund': `🔴 ${t.needRefund}`, 'Pending': `🟡 ${t.pending}` },
+        'editExpenseStatus': { 'Paid': `🟢 ${t.paid}`, 'Need Refund': `🔴 ${t.needRefund}`, 'Pending': `🟡 ${t.pending}` }
+    };
     
-    // Money Type Selects
-    const moneyTypeSelects = ['expenseMoneyType', 'editExpenseMoneyType'];
-    moneyTypeSelects.forEach(id => {
+    Object.entries(typeSelects).forEach(([id, map]) => {
         const select = document.getElementById(id);
         if (select) {
             Array.from(select.options).forEach(opt => {
-                if (opt.value === '') opt.textContent = t.selectType;
-                else if (opt.value === 'Cash') opt.textContent = t.selfMoney;
-                else if (opt.value === 'Bank') opt.textContent = t.houseMoney;
+                if (map[opt.value]) {
+                    opt.textContent = map[opt.value];
+                }
             });
         }
     });
 
-    // Expense Type Selects
-    const expenseTypeSelects = ['expenseType', 'editExpenseType'];
-    expenseTypeSelects.forEach(id => {
-        const select = document.getElementById(id);
-        if (select) {
-            Array.from(select.options).forEach(opt => {
-                if (opt.value === '') opt.textContent = t.selectType;
-                else if (opt.value === 'Cash') opt.textContent = t.cash;
-                else if (opt.value === 'Bank') opt.textContent = t.bank;
-            });
-        }
-    });
-
-    // Category Select (The 'Select category' option)
     const categorySelects = ['expenseCategory', 'editExpenseCategory'];
     categorySelects.forEach(id => {
         const select = document.getElementById(id);
@@ -328,13 +269,11 @@ function applyLanguage() {
         }
     });
 
-    // Report Month Select (The 'Choose Month...' option)
     const reportMonthSelect = document.getElementById('reportMonth');
     if (reportMonthSelect && reportMonthSelect.options.length > 0) {
         reportMonthSelect.options[0].textContent = t.chooseMonth;
     }
 
-    // Update placeholders/buttons not covered by generic loops
     const searchInput = document.getElementById('searchExpenses');
     if (searchInput) searchInput.placeholder = t.search;
     const expenseNote = document.getElementById('expenseNote');
@@ -342,7 +281,6 @@ function applyLanguage() {
     const categoryInput = document.getElementById('categoryInput');
     if (categoryInput) categoryInput.placeholder = t.newCategory;
 
-    // Update language icons
     const langIcon = document.getElementById('langIcon');
     const langIcon2 = document.getElementById('langIcon2');
     const icon = currentLanguage === 'en' ? '🇬🇧' : '🇰🇭';
@@ -351,18 +289,15 @@ function applyLanguage() {
     
     localStorage.setItem('language', currentLanguage);
 
-    // Refresh the table and summary to re-render dynamic content with new language
     updateExpenseTable();
     updateMonthlySummaryTable();
-    // Chart labels need update only if analytic page is active AND charts are initialized
     if (document.getElementById('analytics-page').classList.contains('active') || document.getElementById('dashboard-page').classList.contains('active')) {
         updateCharts();
-        // Only update analytics if the charts have been initialized
         if (analyticsInitialized) {
             updateAnalytics();
         }
     }
-    }
+}
 
 function applySavedLanguage() {
     const saved = localStorage.getItem('language') || 'en';
@@ -395,7 +330,7 @@ function updateExpenseTable() {
     tableBody.innerHTML = "";
 
     if (filtered.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-icon">💸</div><p>${t.noExpenses}</p></td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-icon">💸</div><p>${t.noExpenses}</p></td></tr>`;
         return;
     }
 
@@ -407,10 +342,28 @@ function updateExpenseTable() {
         row.className = "expense-row";
         
         const categoryIndex = categories.indexOf(expense.category);
-        const colorClass = `cat-color-${categoryIndex % 10}`; 
+        const colorClass = `cat-color-${categoryIndex % 10}`;
         
         const moneyTypeDisplay = expense.moneyType === 'Cash' ? t.selfMoney : t.houseMoney;
         const expenseTypeDisplay = expense.expenseType === 'Cash' ? t.cash : t.bank;
+        
+        // Status Display Logic (Already Correct)
+        let statusDisplay = '';
+        let statusClass = '';
+        if (expense.status === 'Paid') {
+            statusDisplay = `🟢 ${t.paid}`;
+            statusClass = 'status-paid';
+        } else if (expense.status === 'Need Refund') {
+            statusDisplay = `🔴 ${t.needRefund}`;
+            statusClass = 'status-need-refund';
+        } else if (expense.status === 'Pending') {
+            statusDisplay = `🟡 ${t.pending}`;
+            statusClass = 'status-pending';
+        } else {
+            // Default status if somehow missing
+            statusDisplay = `🟢 ${t.paid}`;
+            statusClass = 'status-paid';
+        }
 
         row.innerHTML = `
             <td>${formatDate(expense.date)}</td>
@@ -424,20 +377,20 @@ function updateExpenseTable() {
             <td>${moneyTypeDisplay}</td>
             <td>${expenseTypeDisplay}</td>
             <td>${expense.note || '-'}</td>
+            <td><span class="status-badge ${statusClass}">${statusDisplay}</span></td>
             <td class="no-print">
                 <button class="action-btn edit-btn" onclick="openEditModal(${originalIndex})">${t.editExpense}</button>
-                <button class="action-btn danger delete-btn" onclick="deleteExpense(${originalIndex})">${t.deleteBtn || 'Delete'}</button> 
+                <button class="action-btn danger delete-btn" onclick="deleteExpense(${originalIndex})">${t.deleteBtn}</button>
             </td>
         `;
         tableBody.appendChild(row);
     });
 }
 
-// Analytics
 function updateMonthlySummaryTable() {
     const months = [...new Set(expenses.map(e => e.date.slice(0, 7)))].sort().reverse();
     const body = document.getElementById('monthlySummaryBody');
-    const t = translations[currentLanguage]; 
+    const t = translations[currentLanguage];
     
     if (!body) return;
     
@@ -451,7 +404,7 @@ function updateMonthlySummaryTable() {
         const monthExp = expenses.filter(e => e.date.startsWith(month));
         const total = monthExp.reduce((s, e) => s + convertCurrency(e.amount, e.currency, 'USD'), 0);
         const dateObj = new Date(month + '-01');
-        const daysInMonth = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate(); 
+        const daysInMonth = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
         const avgDay = total / daysInMonth;
         const highest = Math.max(...monthExp.map(e => convertCurrency(e.amount, e.currency, 'USD')), 0);
         
@@ -566,7 +519,7 @@ function updateMonthlyChart() {
 // Analytics
 function initializeAnalyticsCharts() {
     const moneyCtx = document.getElementById('moneyTypeChart').getContext('2d');
-    const t = translations[currentLanguage]; // Get translations here
+    const t = translations[currentLanguage]; 
     moneyTypeChart = new Chart(moneyCtx, {
         type: 'doughnut',
         data: { labels: [t.selfMoney, t.houseMoney], datasets: [{ data: [], backgroundColor: ['#10B981','#3B82F6'] }] },
@@ -608,23 +561,21 @@ function updateAnalytics() {
     document.getElementById('statMedian').textContent = `$${median.toFixed(2)}`;
     document.getElementById('statCount').textContent = expenses.length;
 
-    // Money Type (needs translation for labels in the chart)
+    // Money Type 
     const moneyTotals = { 'Cash': 0, 'Bank': 0 };
     expenses.forEach(e => {
         moneyTotals[e.moneyType] += convertCurrency(e.amount, e.currency, 'USD');
     });
     const t = translations[currentLanguage];
     
-    // Ensure labels are set here for language changes
     moneyTypeChart.data.labels = [t.selfMoney, t.houseMoney];
     moneyTypeChart.data.datasets[0].data = [moneyTotals['Cash'], moneyTotals['Bank']];
     moneyTypeChart.update();
 
-    // Expense Type (needs translation for labels in the chart)
+    // Expense Type 
     const typeTotals = { 'Cash': 0, 'Bank': 0 };
     expenses.forEach(e => typeTotals[e.expenseType] = (typeTotals[e.expenseType] || 0) + convertCurrency(e.amount, e.currency, 'USD'));
     
-    // Ensure labels are set here for language changes
     expenseTypeChart.data.labels = [t.cash, t.bank];
     expenseTypeChart.data.datasets[0].data = [typeTotals['Cash'], typeTotals['Bank']];
     expenseTypeChart.update();
@@ -648,20 +599,20 @@ function updateAnalytics() {
 
     // 12-month trend
     const monthKeys = [];
-    const monthlyTotals = {};
+    const monthlyTotalsTrend = {};
     for (let i = 11; i >= 0; i--) {
         const date = new Date();
         date.setMonth(date.getMonth() - i);
         const key = date.toISOString().slice(0,7);
         monthKeys.push(key);
-        monthlyTotals[key] = 0;
+        monthlyTotalsTrend[key] = 0;
     }
     expenses.forEach(e => {
         const k = e.date.slice(0,7);
-        if (monthlyTotals.hasOwnProperty(k)) monthlyTotals[k] += convertCurrency(e.amount, e.currency, 'USD');
+        if (monthlyTotalsTrend.hasOwnProperty(k)) monthlyTotalsTrend[k] += convertCurrency(e.amount, e.currency, 'USD');
     });
     trendChart.data.labels = monthKeys.map(k => new Date(k + '-02').toLocaleDateString(currentLanguage === 'km' ? 'km-KH' : 'en-US', { month: 'short', year: '2-digit' }));
-    trendChart.data.datasets[0].data = monthKeys.map(k => monthlyTotals[k] || 0);
+    trendChart.data.datasets[0].data = monthKeys.map(k => monthlyTotalsTrend[k] || 0);
     trendChart.update();
 
     updateMonthlySummaryTable();
@@ -724,14 +675,13 @@ function updateCategorySelects() {
     });
 }
 
-// FIX: This function was missing in the second half.
 function addCategoryFromModal() {
     const input = document.getElementById("categoryInput");
     const name = input.value.trim();
     
     if (name && !categories.includes(name)) {
         categories.push(name);
-        saveAllData(); // FIX: Ensures categories persist
+        saveAllData(); 
         updateCategoryList();
         updateCategorySelects();
         input.value = "";
@@ -798,19 +748,18 @@ function deleteCategory(i) {
     updateCharts();
 }
 
-// Export & Import Fixes
-
-// FIX: CSV export function
+// Export & Import
 function downloadCSV() {
     const t = translations[currentLanguage];
-    let csv = `${t.tableDate},${t.tableAmount},${t.currency},${t.tableCategory},${t.tableMoneyType},${t.tableType},${t.tableDescription}\n`;
+    let csv = `${t.tableDate},${t.tableAmount},${t.currency},${t.tableCategory},${t.tableMoneyType},${t.tableType},${t.tableDescription},${t.status}\n`;
     expenses.forEach(e => {
-        // Use translated display names for Money Type and Expense Type in the CSV
+        // Use translated display names for Money Type, Expense Type, and Status in the CSV
         const moneyType = e.moneyType === 'Cash' ? t.selfMoney : t.houseMoney;
         const expenseType = e.expenseType === 'Cash' ? t.cash : t.bank;
+        const status = e.status; // Save internal value (Paid, Pending, Need Refund)
         const note = e.note ? `"${e.note.replace(/"/g, '""')}"` : '""';
         
-        csv += `${e.date},${e.amount},${e.currency},${e.category},${moneyType},${expenseType},${note}\n`;
+        csv += `${e.date},${e.amount},${e.currency},${e.category},${moneyType},${expenseType},${note},${status}\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -824,18 +773,14 @@ function downloadCSV() {
     URL.revokeObjectURL(url);
 }
 
-// FIX: PDF download function
 function downloadPDF() {
     window.print();
 }
 
-
-// FIX: Import function
 function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Get translations for both languages for robust mapping
     const t = translations[currentLanguage]; 
     const t_en = translations['en'];
     const t_km = translations['km'];
@@ -843,7 +788,6 @@ function importData(e) {
     const reader = new FileReader();
     reader.onload = function(ev) {
         const data = new Uint8Array(ev.target.result);
-        // Assumes the XLSX library (sheetjs) is loaded in the HTML
         const wb = XLSX.read(data, { type: 'array', cellDates: true });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(ws);
@@ -853,24 +797,20 @@ function importData(e) {
             return;
         }
 
-        // --- Step 1: Detect Column Headers (Support both English and Khmer) ---
+        // --- Step 1: Detect Column Headers ---
         const firstRow = json[0];
         const headers = Object.keys(firstRow);
         
-        // Create a mapping object to find the correct column regardless of language
         const findColumn = (enKey, kmKey) => {
-            // Check if English or Khmer header exists
             if (firstRow[enKey] !== undefined) return enKey;
             if (firstRow[kmKey] !== undefined) return kmKey;
-            // Fallback: check if any header contains similar text (case-insensitive)
             const found = headers.find(h => 
                 h.toLowerCase().includes(enKey.toLowerCase()) ||
                 h.includes(kmKey)
             );
-            return found || enKey; // Return English key as final fallback
+            return found || enKey; 
         };
 
-        // Detect actual column names used in the spreadsheet
         const dateCol = findColumn('Date', t_km.tableDate);
         const amountCol = findColumn('Amount', t_km.tableAmount);
         const currencyCol = findColumn('Currency', t_km.currency);
@@ -878,52 +818,46 @@ function importData(e) {
         const moneyTypeCol = findColumn('Money Type', t_km.tableMoneyType);
         const expenseTypeCol = findColumn('Type', t_km.tableType);
         const descCol = findColumn('Description', t_km.tableDescription);
+        const statusCol = findColumn('Status', t_km.tableStatus || 'Status'); 
         
-        // --- Step 2: Define Translation Mapping Logic (Enhanced for Khmer) ---
+        // --- Step 2: Define Translation Mapping Logic ---
         try {
             const mapType = (val, typeKey) => {
                 const original = String(val || '').trim();
                 const lower = original.toLowerCase();
-                if (!original) return 'Cash'; // Default if cell is empty
+                if (!original) return (typeKey === 'status') ? 'Paid' : 'Cash';
 
-                // Money Type (Internal keys: Cash/Bank, Display: Self Money/House Money)
                 if (typeKey === 'money') {
-                    // Check for House Money in both languages
-                    if (lower.includes(t_en.houseMoney.toLowerCase()) || 
-                        original.includes(t_km.houseMoney) ||
-                        lower.includes('house') ||
-                        lower.includes('bank')) {
+                    if (lower.includes(t_en.houseMoney.toLowerCase()) || original.includes(t_km.houseMoney) || lower.includes('house') || lower.includes('bank')) {
                         return 'Bank'; 
                     }
-                    // Default to Self Money
                     return 'Cash'; 
                 }
 
-                // Expense Type (Internal keys: Cash/Bank)
                 if (typeKey === 'expense') {
-                    // Check for Bank in both languages
-                    if (lower.includes(t_en.bank.toLowerCase()) || 
-                        original.includes(t_km.bank) ||
-                        lower.includes('bank')) {
+                    if (lower.includes(t_en.bank.toLowerCase()) || original.includes(t_km.bank) || lower.includes('bank')) {
                         return 'Bank';
                     }
-                    // Default to Cash
                     return 'Cash'; 
                 }
                 
-                return 'Cash'; // Default fallback
+                if (typeKey === 'status') {
+                    if (lower.includes('refund')) return 'Need Refund';
+                    if (lower.includes('pending')) return 'Pending';
+                    return 'Paid'; 
+                }
+                
+                return 'Cash'; 
             };
 
             // --- Step 3: Process JSON Data ---
             const newExp = json.map(row => {
-                // Ensure required fields exist
                 if (!row[dateCol] || typeof row[amountCol] === 'undefined' || !row[categoryCol]) {
                      console.warn('Skipping row due to missing required data:', row);
                      return null; 
                 }
                 
                 return {
-                    // Normalize Date: XLSX dates can be numbers or Date objects
                     date: row[dateCol] instanceof Date 
                         ? row[dateCol].toISOString().split('T')[0] 
                         : String(row[dateCol]).split('T')[0],
@@ -931,21 +865,18 @@ function importData(e) {
                     amount: parseFloat(row[amountCol]),
                     currency: row[currencyCol] || 'USD',
                     category: String(row[categoryCol]),
-                    
-                    // Use the dynamically detected keys and mapping function
                     moneyType: mapType(row[moneyTypeCol], 'money'),
                     expenseType: mapType(row[expenseTypeCol], 'expense'),
-                    
+                    status: row[statusCol] ? mapType(row[statusCol], 'status') : 'Paid',
                     note: String(row[descCol] || ''),
                     id: Date.now() + Math.random()
                 };
-            }).filter(e => e !== null && !isNaN(e.amount)); // Filter out null/invalid entries
+            }).filter(e => e !== null && !isNaN(e.amount)); 
 
             // --- Step 4: Finalize Import ---
             if (newExp.length > 0) {
                 expenses.push(...newExp);
                 
-                // Update categories list with any newly imported categories
                 const newCategories = [...new Set(newExp.map(e => e.category))];
                 newCategories.forEach(c => {
                     if (!categories.includes(c)) categories.push(c);
@@ -1000,37 +931,63 @@ function clearAllExpenses() {
     }
 }
 
-function openEditModal(i) {
-    currentEditIndex = i;
-    const e = expenses[i];
-    document.getElementById("editExpenseDate").value = e.date;
-    document.getElementById("editExpenseAmount").value = e.amount;
-    document.getElementById("editExpenseCurrency").value = e.currency;
-    document.getElementById("editExpenseCategory").value = e.category;
-    document.getElementById("editExpenseMoneyType").value = e.moneyType;
-    document.getElementById("editExpenseType").value = e.expenseType;
-    document.getElementById("editExpenseNote").value = e.note;
+// --- EXPENSE CRUD FUNCTIONS (FIXED) ---
+
+function openEditModal(index) {
+    const expense = expenses[index];
+    if (!expense) return;
+
+    // Store the index globally for the update function
+    currentEditIndex = index;
+    
+    // Populate the form fields in the modal
+    document.getElementById("editExpenseDate").value = expense.date;
+    document.getElementById("editExpenseAmount").value = expense.amount;
+    document.getElementById("editExpenseCurrency").value = expense.currency;
+    
+    updateCategorySelects(); 
+    document.getElementById("editExpenseCategory").value = expense.category;
+    
+    document.getElementById("editExpenseMoneyType").value = expense.moneyType;
+    document.getElementById("editExpenseType").value = expense.expenseType;
+    
+    // ⭐ STATUS FIX: Read the expense status and populate the modal select
+    document.getElementById("editExpenseStatus").value = expense.status || 'Paid'; 
+    
+    document.getElementById("editExpenseNote").value = expense.note;
+
+    // Show the modal
     applyLanguage(); 
-    $('#editExpenseModal').modal('show');
+    $('#editExpenseModal').modal('show'); 
 }
 
 function updateExpense(e) {
     e.preventDefault();
-    expenses[currentEditIndex] = {
-        date: document.getElementById("editExpenseDate").value,
-        amount: parseFloat(document.getElementById("editExpenseAmount").value),
-        currency: document.getElementById("editExpenseCurrency").value,
-        category: document.getElementById("editExpenseCategory").value,
-        moneyType: document.getElementById("editExpenseMoneyType").value,
-        expenseType: document.getElementById("editExpenseType").value,
-        note: document.getElementById("editExpenseNote").value,
-        id: expenses[currentEditIndex].id
-    };
+    if (currentEditIndex === null) return;
+
+    const expense = expenses[currentEditIndex];
+    
+    expense.date = document.getElementById("editExpenseDate").value;
+    expense.amount = parseFloat(document.getElementById("editExpenseAmount").value);
+    expense.currency = document.getElementById("editExpenseCurrency").value;
+    expense.category = document.getElementById("editExpenseCategory").value;
+    expense.moneyType = document.getElementById("editExpenseMoneyType").value;
+    expense.expenseType = document.getElementById("editExpenseType").value;
+    
+    // ⭐ STATUS FIX: Save the new status from the modal
+    expense.status = document.getElementById("editExpenseStatus").value;
+    
+    expense.note = document.getElementById("editExpenseNote").value;
+
     saveAllData();
-    updateExpenseTable();
+    
+    // Hide the modal
+    $('#editExpenseModal').modal('hide'); 
+    
+    currentEditIndex = null;
     updateDashboard();
+    updateExpenseTable();
     updateCharts();
-    $('#editExpenseModal').modal('hide');
 }
 
 function deleteExpense(i) {
@@ -1046,76 +1003,6 @@ function deleteExpense(i) {
 function openCategoryModal() {
     updateCategoryList();
     $('#categoryModal').modal('show');
-}
-// --- MISSING EXPENSE CRUD FUNCTIONS ---
-
-function deleteExpense(index) {
-    if (confirm("Are you sure you want to delete this expense?")) {
-        expenses.splice(index, 1);
-        saveAllData();
-        updateDashboard();
-        updateExpenseTable();
-        updateMonthFilter();
-        updateCharts();
-    }
-}
-
-function openEditModal(index) {
-    const expense = expenses[index];
-    if (!expense) return;
-
-    // Store the index globally for the update function
-    currentEditIndex = index;
-    
-    // Populate the form fields in the modal
-    document.getElementById("editExpenseDate").value = expense.date;
-    document.getElementById("editExpenseAmount").value = expense.amount;
-    document.getElementById("editExpenseCurrency").value = expense.currency;
-    
-    // Ensure category selects are populated before selecting the value
-    updateCategorySelects(); 
-    document.getElementById("editExpenseCategory").value = expense.category;
-    
-    document.getElementById("editExpenseMoneyType").value = expense.moneyType;
-    document.getElementById("editExpenseType").value = expense.expenseType;
-    document.getElementById("editExpenseNote").value = expense.note;
-
-    // Show the modal (Requires Bootstrap or custom modal function)
-    $('#editExpenseModal').modal('show'); 
-    
-    // If you don't use Bootstrap/jQuery, you need a custom function:
-    // document.getElementById('editExpenseModal').style.display = 'block';
-    // document.getElementById('editExpenseModal').classList.add('show');
-}
-
-
-function updateExpense(e) {
-    e.preventDefault();
-    if (currentEditIndex === null) return;
-
-    const expense = expenses[currentEditIndex];
-    
-    expense.date = document.getElementById("editExpenseDate").value;
-    expense.amount = parseFloat(document.getElementById("editExpenseAmount").value);
-    expense.currency = document.getElementById("editExpenseCurrency").value;
-    expense.category = document.getElementById("editExpenseCategory").value;
-    expense.moneyType = document.getElementById("editExpenseMoneyType").value;
-    expense.expenseType = document.getElementById("editExpenseType").value;
-    expense.note = document.getElementById("editExpenseNote").value;
-
-    saveAllData();
-    
-    // Hide the modal (Requires Bootstrap or custom modal function)
-    $('#editExpenseModal').modal('hide'); 
-    
-    // If you don't use Bootstrap/jQuery, you need a custom function:
-    // document.getElementById('editExpenseModal').style.display = 'none';
-    // document.getElementById('editExpenseModal').classList.remove('show');
-    
-    currentEditIndex = null;
-    updateDashboard();
-    updateExpenseTable();
-    updateCharts();
 }
 
 // Page Navigation

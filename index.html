@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="print.css" media="print">
+
 </head>
 <body>
     <nav class="top-navbar">
@@ -18,12 +20,16 @@
                 </div>
                 <div class="nav-actions">
                     <button class="nav-btn" onclick="showPage('dashboard')" id="navDashboard">
+                        📊 Dashboard
                     </button>
                     <button class="nav-btn" onclick="showPage('analytics')" id="navAnalytics">
+                        📈 Analytics
                     </button>
                     <button class="nav-btn" onclick="showPage('reports')" id="navReports">
+                        📋 Reports
                     </button>
                     <button class="nav-btn" onclick="openCategoryModal()" id="navCategories">
+                        📁 Categories
                     </button>
                     <button class="nav-btn" onclick="toggleTheme()">
                         <span id="themeIcon">🌙</span>
@@ -56,7 +62,7 @@
                     </div>
                 </div>
 
-                <div class="stats-grid">
+                <div class="stats-grid" id="statsGrid">
                     <div class="stat-card gradient-blue">
                         <div class="stat-icon">💳</div>
                         <div class="stat-info">
@@ -106,7 +112,7 @@
                     </div>
                 </div>
 
-                <div class="add-expense-section">
+               <div class="add-expense-section">
                     <div class="section-header">
                         <h3>➕ Add New Expense</h3>
                     </div>
@@ -149,6 +155,14 @@
                                     <option value="">Select category</option>
                                 </select>
                             </div>
+                            </div>
+                        <div class="form-group">
+                            <label for="expenseStatus">Status</label>
+                            <select id="expenseStatus" class="form-input">
+                                <option value="Paid">🟢 Paid</option>
+                                <option value="Need Refund">🔴 Need Refund</option>
+                                <option value="Pending">🟡 Pending</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="expenseNote">Description</label>
@@ -161,7 +175,7 @@
                <div class="table-section" id="recentTransactionsSection">
                     <div class="table-header">
                         <h3>Recent Transactions</h3>
-                        <div class="table-filters">
+                        <div class="table-filters no-print">
                             <input type="text" id="searchExpenses" class="filter-input" placeholder="Search...">
                             <select id="filterMonth" class="filter-input">
                                 <option value="">All Time</option>
@@ -178,12 +192,13 @@
                                     <th>Money Type</th>
                                     <th>Type</th>
                                     <th>Description</th>
+                                    <th>Status</th>
                                     <th class="no-print">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="expenseTableBody">
                                 <tr>
-                                    <td colspan="7" class="empty-state">
+                                    <td colspan="8" class="empty-state">
                                         <div class="empty-icon">💸</div>
                                         <p>No expenses yet. Add your first expense above!</p>
                                     </td>
@@ -434,6 +449,16 @@
                                 <select id="editExpenseType" class="form-control">
                                     <option value="Cash">Cash</option>
                                     <option value="Bank">Bank</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="editExpenseStatus">Status</label>
+                                <select id="editExpenseStatus" class="form-control">
+                                    <option value="Paid">🟢 Paid</option>
+                                    <option value="Need Refund">🔴 Need Refund</option>
+                                    <option value="Pending">🟡 Pending</option>
                                 </select>
                             </div>
                         </div>

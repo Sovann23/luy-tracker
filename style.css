@@ -44,18 +44,14 @@ body {
 
 /* CRITICAL FIX: Khmer Language Support - Keep English bold consistent */
 body[data-language="km"] {
-    /* Mix Khmer and English fonts - English will use system font, Khmer will use Khmer font */
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Sans Khmer', 'Khmer OS', sans-serif;
 }
 
-/* Don't override font-family for strong tags - let them inherit from parent */
 body[data-language="km"] strong,
 body[data-language="km"] b {
-    /* Remove font-family override - inherit from body */
     font-weight: 700;
 }
 
-/* Keep bold weight consistent across all elements */
 body[data-language="km"] .stat-label,
 body[data-language="km"] label {
     font-weight: 600;
@@ -297,10 +293,9 @@ body[data-language="km"] .welcome-section h2 {
     margin-bottom: 0.25rem;
 }
 
-/* FIXED: Charts Grid - Ensures 4 columns on wide screens */
+/* Charts Grid */
 .charts-grid {
     display: grid;
-    /* CRITICAL FIX: Use explicit minmax with smaller minimum */
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
@@ -311,7 +306,6 @@ body[data-language="km"] .welcome-section h2 {
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-    /* CRITICAL FIX: Prevent cards from growing too large */
     max-width: 100%;
 }
 
@@ -336,7 +330,6 @@ body[data-language="km"] .welcome-section h2 {
 
 .chart-body {
     padding: 1.5rem;
-    /* CRITICAL FIX: Reduced height for better fit */
     height: 250px;
 }
 
@@ -549,6 +542,47 @@ select.filter-input {
 .cat-color-7 { background: var(--cat-8); color: #1e293b; }
 .cat-color-8 { background: var(--cat-9); color: white; }
 .cat-color-9 { background: var(--cat-10); color: white; }
+
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-paid {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-need-refund {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+body[data-theme="dark"] .status-paid {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34D399;
+}
+
+body[data-theme="dark"] .status-need-refund {
+    background: rgba(239, 68, 68, 0.2);
+    color: #F87171;
+}
+
+body[data-theme="dark"] .status-pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #FBBF24;
+}
 
 .action-btns {
     display: flex;
