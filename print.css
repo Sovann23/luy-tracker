@@ -10,35 +10,19 @@
         color: #1a1a1a !important;
     }
 
-    /* ⭐ FIX 1A: Reduced margin for mobile/narrow print to ensure content fits */
+    /* ⭐ FIX 1A: Reduced margin for ALL print media (desktop and mobile) to ensure content fits edge-to-edge. */
     @page {
-        margin: 8mm; /* Reduced margin from 10mm to 8mm */
+        margin: 5mm; /* Reduced to 5mm to maximize print area */
         size: A4; 
     }
 
     body {
         margin: 0;
-        padding: 0; /* Remove body padding */
+        padding: 0; 
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-size: 11pt;
         line-height: 1.5;
     }
-    
-    /* ⭐ FIX 2A: Expense Report Title (MOVED TO TOP) */
-    /* Attach the title to the dashboard page to ensure it appears first */
-    #dashboard-page::before {
-        content: "Expense Report";
-        display: block;
-        text-align: center;
-        font-size: 28pt; 
-        font-weight: 700 !important; 
-        letter-spacing: -0.5px;
-        margin-bottom: 40px; /* Space after the title */
-        padding-top: 10px; /* Small pad from the top edge */
-        color: #000 !important;
-        page-break-after: avoid !important; /* Prevent a page break right after the title */
-    }
-
 
     /* Hide UI elements */
     header, nav, .sidebar, .navbar, .top-nav, .top-navbar,
@@ -57,15 +41,31 @@
 
     #dashboard-page {
         display: block !important;
-        /* ⭐ FIX 1B: Ensure the main container fills the available print width */
         width: 100% !important;
-        padding: 0 5mm !important; /* Add a small horizontal pad inside the page */
+        padding: 0 !important; 
     }
 
     /* Hide analytics and reports pages */
     #analytics-page,
     #reports-page {
         display: none !important;
+    }
+
+    /* ===================================================================
+    ⭐ FIX 2: Expense Report Title (Moved to the absolute top of the print job)
+    ===================================================================
+    */
+    body::before {
+        content: "Expense Report";
+        display: block;
+        text-align: center;
+        font-size: 28pt; 
+        font-weight: 700 !important; 
+        letter-spacing: -0.5px;
+        margin-bottom: 30px; 
+        padding-top: 5mm; 
+        color: #000 !important;
+        page-break-after: avoid !important;
     }
 
     /* ======= Clean Stats Grid (PAGE BREAK FIX) ======= */
@@ -180,7 +180,7 @@
         overflow: visible !important;
     }
 
-    /* ======= Minimal Table Design (Table Sizing) ======= */
+    /* ======= Minimal Table Design (Table Sizing & Status Fix) ======= */
     table, .expense-table {
         display: table !important;
         width: 100% !important;
@@ -248,13 +248,13 @@
         font-weight: 600 !important; 
     }
     
-    /* Ensure the Status column is narrow */
+    /* ⭐ FIX 3A: Increase the Status column width to prevent cut-off */
     table td:nth-child(7) { 
         font-size: 7.5pt !important; 
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
         white-space: nowrap !important;
-        width: 10% !important;
+        width: 12% !important; /* Increased from 10% to 12% */
     }
     
     /* Ensure the Date column is narrow */
@@ -314,13 +314,14 @@
     .cat-color-9 { background-color: #AA96DA !important; color: white !important; }
 
 
-    /* ======= Typography Refinements ======= */
-    table td:first-child {
-        color: #333 !important; 
-        font-weight: 500 !important;
+    /* ======= Status Badges Fix: Ensure colors print & ⭐ FIX 3B: Adjust size/padding to fit 'NEED REFUND' ======= */
+    .status-paid, .status-need-refund, .status-pending {
+        /* Reduce padding slightly */
+        padding: 2px 4px !important;
+        /* Reduce font size slightly */
+        font-size: 7pt !important;
     }
-    
-    /* ======= Status Badges Fix: Ensure colors print ======= */
+
     .status-paid {
         background-color: rgba(16, 185, 129, 0.15) !important;
         color: #10B981 !important;
