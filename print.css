@@ -55,13 +55,14 @@
         color: #000 !important;
     }
 
-    /* ======= Clean Stats Grid ======= */
+    /* ======= Clean Stats Grid (PAGE BREAK FIX) ======= */
     .stats-grid {
         display: grid !important;
         grid-template-columns: repeat(4, 1fr) !important;
         gap: 20px !important;
         margin: 0 auto 50px auto !important;
         max-width: 900px !important;
+        page-break-inside: avoid !important; /* ⭐ FIX: Keep the entire stats row on one page */
     }
 
     .stat-card {
@@ -107,7 +108,7 @@
         background: #fafafa !important;
     }
 
-    /* ======= Minimal Chart Section (SINGLE COLUMN FIX) ======= */
+    /* ======= Minimal Chart Section (PAGE BREAK FIX) ======= */
     
     /* Force charts into a single column */
     .charts-grid {
@@ -123,7 +124,7 @@
         max-width: 900px !important; 
         border: 1px solid #e0e0e0 !important; 
         padding: 20px !important;
-        page-break-inside: avoid;
+        page-break-inside: avoid !important; /* ⭐ FIX: Keep charts from splitting across pages */
     }
 
     .chart-header {
@@ -154,19 +155,15 @@
         display: block !important;
     }
 
-    /* ======= Clean Table Section (Mobile Fix Here) ======= */
+    /* ======= Clean Table Section (PAGE BREAK FIX) ======= */
     .table-section {
         display: block !important;
         margin-top: 50px !important;
-        page-break-inside: avoid !important;
+        page-break-inside: auto !important; /* Allow the section to break, but control internal elements */
+        page-break-before: auto !important; /* Allow break before if necessary */
     }
-
-    .table-header {
-        display: none !important;
-    }
-
+    
     .table-responsive {
-        /* Set to visible for print layout, as scrolling is not possible in a PDF */
         overflow: visible !important;
     }
 
@@ -176,10 +173,8 @@
         width: 100% !important;
         border-collapse: separate !important;
         border-spacing: 0 !important;
-        /* ⭐ FIX 1: Set a very small font size as a last resort for shrinking content */
         font-size: 7.5pt !important; 
         margin-top: 20px !important;
-        /* ⭐ FIX 2: Ensure the table is forced to fit the available print width */
         table-layout: fixed !important; 
     }
 
@@ -193,17 +188,17 @@
 
     table tr {
         display: table-row !important;
-        page-break-inside: avoid !important;
+        page-break-inside: avoid !important; /* ⭐ FIX: Prevent a single row from splitting */
     }
 
     table th {
         display: table-cell !important;
-        padding: 6px 4px !important; /* Reduced padding for more space */
+        padding: 6px 4px !important; 
         text-align: left !important;
-        font-size: 8pt !important; /* Reduced header font size */
+        font-size: 8pt !important; 
         font-weight: 800 !important; 
         text-transform: uppercase !important;
-        letter-spacing: 0.3px !important; /* Reduced spacing */
+        letter-spacing: 0.3px !important; 
         color: #000 !important; 
         background: #e9e9e9 !important; 
         border-bottom: 2px solid #ddd !important;
@@ -219,11 +214,11 @@
 
     table td {
         display: table-cell !important;
-        padding: 6px 4px !important; /* Reduced padding for more space */
+        padding: 6px 4px !important; 
         border-bottom: 1px solid #f0f0f0 !important;
         color: #333 !important;
-        overflow: hidden !important; /* Helps with fitting long text */
-        text-overflow: ellipsis !important; /* Show '...' if cut off */
+        overflow: hidden !important; 
+        text-overflow: ellipsis !important; 
     }
     
     /* Ensure the Amount column is narrow */
@@ -231,6 +226,7 @@
         font-weight: 600 !important;
         color: #000 !important;
         white-space: nowrap !important;
+        width: 15% !important;
     }
 
     /* FIX: Category column data cells (Reset background color) */
@@ -245,6 +241,7 @@
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
         white-space: nowrap !important;
+        width: 10% !important;
     }
     
     /* Ensure the Date column is narrow */
@@ -252,15 +249,6 @@
         white-space: nowrap !important;
         width: 15% !important; 
     }
-    /* Ensure the Amount column is narrow */
-    table td:nth-child(2) {
-        width: 15% !important;
-    }
-    /* Ensure the Status column is narrow */
-    table td:nth-child(7) {
-        width: 10% !important;
-    }
-
 
     table tbody tr:hover {
         background: transparent !important;
@@ -279,9 +267,9 @@
     
     .category-badge {
         display: inline-block !important;
-        padding: 3px 6px !important; /* Reduced padding for space */
+        padding: 3px 6px !important; 
         border-radius: 4px !important;
-        font-size: 7pt !important; /* Reduced badge font size */
+        font-size: 7pt !important; 
         font-weight: 700 !important;
         line-height: 1.2 !important;
         
@@ -353,10 +341,9 @@
     }
 
     /* ======= Page optimization ======= */
-    /* Mobile devices often use smaller paper sizes. This attempts to utilize the full width. */
     @page {
-        margin: 10mm; /* Reduced margin for smaller screens */
-        size: A4; /* Default, but the browser may still use smaller canvas */
+        margin: 10mm; 
+        size: A4; 
     }
 
     .page-content:last-child {
