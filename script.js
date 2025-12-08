@@ -313,7 +313,6 @@ function toggleLanguage() {
 }
 
 // --- TABLE & DATA RENDERING ---
-
 function updateExpenseTable() {
     const tableBody = document.getElementById("expenseTableBody");
     const searchTerm = document.getElementById("searchExpenses").value.toLowerCase();
@@ -341,8 +340,9 @@ function updateExpenseTable() {
         const row = document.createElement("tr");
         row.className = "expense-row";
         
+        // ⭐ FIX: Calculate and use the category index for the color class
         const categoryIndex = categories.indexOf(expense.category);
-        const colorClass = `cat-color-${categoryIndex % 10}`;
+        const colorClass = `cat-color-${categoryIndex % categoryColors.length}`; // Use length of categoryColors array
         
         const moneyTypeDisplay = expense.moneyType === 'Cash' ? t.selfMoney : t.houseMoney;
         const expenseTypeDisplay = expense.expenseType === 'Cash' ? t.cash : t.bank;
@@ -360,7 +360,6 @@ function updateExpenseTable() {
             statusDisplay = `🟡 ${t.pending}`;
             statusClass = 'status-pending';
         } else {
-            // If status is empty or not provided, show '-' (optional like description)
             statusDisplay = '-';
             statusClass = '';
         }
@@ -372,7 +371,7 @@ function updateExpenseTable() {
                 ${expense.currency !== 'USD' ? `<br><small>($${convertCurrency(expense.amount, expense.currency, 'USD').toFixed(2)})</small>` : ''}
             </td>
             <td>
-                <span class="badge ${colorClass}">${expense.category}</span>
+                <span class="category-badge ${colorClass}">${expense.category}</span>
             </td>
             <td>${moneyTypeDisplay}</td>
             <td>${expenseTypeDisplay}</td>
@@ -775,18 +774,22 @@ function downloadCSV() {
 
 function downloadPDF() {
     const title = 'Expense Report - Luy Tracker';
-    // Select the content you want to print
+    
+    // Select the necessary dashboard content
     const statsGrid = document.getElementById('statsGrid');
+    const categoryChartContainer = document.getElementById('categoryChart').closest('.chart-card');
+    const monthlyChartContainer = document.getElementById('monthlyChart').closest('.chart-card');
     const recentSection = document.getElementById('recentTransactionsSection');
-    // Assuming the expenses table is inside a .table-responsive within the recentSection
-    const tableWrap = recentSection ? recentSection.querySelector('.table-responsive') : null;
 
     const statsHtml = statsGrid ? statsGrid.outerHTML : '';
-    const tableHtml = tableWrap ? tableWrap.outerHTML : '';
+    const categoryChartHtml = categoryChartContainer ? categoryChartContainer.outerHTML : '';
+    const monthlyChartHtml = monthlyChartContainer ? monthlyChartContainer.outerHTML : '';
+    const recentTableHtml = recentSection ? recentSection.outerHTML : '';
 
     // Guard clause: if no content to print, stop.
-    if (!statsHtml && !tableHtml) {
-        console.warn('No content (statsGrid or expenses table) found for PDF export.');
+    if (!statsHtml && !recentTableHtml) {
+        console.warn('No content found for PDF export.');
+        alert('Cannot generate PDF: No data visible on the dashboard.');
         return;
     }
 
@@ -804,15 +807,21 @@ function downloadPDF() {
         overflow: hidden;
     `;
 
-    // 2. Populate the container with the content and necessary structure
+    // 2. Structure the content inside the container
+    // We explicitly insert the stats, then the charts, then the full transactions table.
     printContainer.innerHTML = `
-        <div style="padding:16px;">
-            <h2 style="text-align:center;margin-bottom:8px">${title}</h2>
-            <div id="print-stats">${statsHtml}</div>
-            <div id="print-table">${tableHtml}</div>
+        <div class="container-fluid">
+            <div id="print-stats" class="stats-grid">${statsHtml}</div>
+            
+            <div class="charts-grid">
+                ${categoryChartHtml}
+                ${monthlyChartHtml}
+            </div>
+
+            <div id="print-table" class="table-section">${recentTableHtml}</div>
         </div>
     `;
-
+    
     // 3. Append the container to the body
     document.body.appendChild(printContainer);
 
@@ -822,16 +831,16 @@ function downloadPDF() {
         window.print();
     } catch (e) {
         console.warn('Print failed', e);
+        alert('❌ PDF generation failed. Ensure printing permissions are granted.');
     }
     
-    // 5. Clean up: After the print dialog is closed/canceled, the timeout will remove the container.
+    // 5. Clean up
     // Use a short timeout to ensure the print process has started before removal.
     setTimeout(() => {
         if (printContainer.parentNode) {
             printContainer.parentNode.removeChild(printContainer);
         }
     }, 500);
-    // Note: Since the container is off-screen, we no longer need to hide and show the main UI elements.
 }
 
 function importData(e) {

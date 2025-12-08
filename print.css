@@ -24,7 +24,7 @@
     .search-bar, .btn, button, .actions, .no-print,
     .table-filters, .table-footer, .action-btn,
     .welcome-section, .add-expense-section, .section-header,
-    .form-grid, form, .charts-grid, .footer {
+    .form-grid, form, .footer {
         display: none !important;
     }
 
@@ -43,13 +43,13 @@
         display: none !important;
     }
 
-    /* ======= Minimal Header ======= */
+    /* ======= Minimal Header (BOLD/PROMINENT FIX) ======= */
     .table-section::before {
         content: "Expense Report";
         display: block;
         text-align: center;
-        font-size: 24pt;
-        font-weight: 300;
+        font-size: 28pt; 
+        font-weight: 700 !important; 
         letter-spacing: -0.5px;
         margin-bottom: 40px;
         color: #000 !important;
@@ -77,7 +77,7 @@
     }
 
     .stat-card .stat-icon {
-        display: none !important; /* Remove emojis for minimal look */
+        display: none !important;
     }
 
     .stat-card .stat-info {
@@ -107,24 +107,36 @@
         background: #fafafa !important;
     }
 
-    /* ======= Minimal Chart Section ======= */
+    /* ======= Minimal Chart Section (SINGLE COLUMN FIX) ======= */
+    
+    /* Force charts into a single column */
+    .charts-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important; 
+        gap: 40px !important; 
+        margin: 40px auto 50px auto !important;
+        max-width: 900px !important; 
+    }
+    
     .chart-card {
         display: block !important;
-        margin: 40px auto !important;
-        max-width: 500px !important;
-        border: none !important;
-        padding: 0 !important;
+        max-width: 900px !important; 
+        border: 1px solid #e0e0e0 !important; 
+        padding: 20px !important;
+        page-break-inside: avoid;
     }
 
     .chart-header {
         display: block !important;
-        text-align: center !important;
-        margin-bottom: 30px !important;
+        text-align: left !important; 
+        margin-bottom: 20px !important;
+        border-bottom: 1px dashed #ccc !important;
+        padding-bottom: 10px !important;
     }
 
     .chart-header h3 {
-        font-size: 14pt !important;
-        font-weight: 500 !important;
+        font-size: 16pt !important; 
+        font-weight: 600 !important;
         color: #333 !important;
         margin: 0 !important;
     }
@@ -136,8 +148,8 @@
     }
 
     .chart-body canvas {
-        max-width: 350px !important;
-        max-height: 350px !important;
+        max-width: 800px !important; 
+        max-height: 400px !important;
         margin: 0 auto !important;
         display: block !important;
     }
@@ -150,20 +162,19 @@
     }
 
     .table-header {
-        display: none !important; /* Remove redundant header */
+        display: none !important;
     }
 
     .table-responsive {
         overflow: visible !important;
     }
 
-    /* ======= Minimal Table Design (Mobile Print Fixes) ======= */
+    /* ======= Minimal Table Design (Header & Cell Fixes) ======= */
     table, .expense-table {
         display: table !important;
         width: 100% !important;
         border-collapse: separate !important;
         border-spacing: 0 !important;
-        /* ⭐ FIX 1: Reduce overall table font size slightly */
         font-size: 8.5pt !important; 
         margin-top: 20px !important;
     }
@@ -183,23 +194,27 @@
 
     table th {
         display: table-cell !important;
-        /* ⭐ FIX 2: Reduce horizontal padding on headers */
         padding: 8px 6px !important; 
         text-align: left !important;
-        font-size: 8.5pt !important;
-        font-weight: 600 !important;
+        font-size: 9pt !important; 
+        font-weight: 800 !important; 
         text-transform: uppercase !important;
-        letter-spacing: 0.3px !important;
-        color: #666 !important;
-        background: #f8f8f8 !important;
+        letter-spacing: 0.5px !important; 
+        color: #000 !important; 
+        background: #e9e9e9 !important; 
         border-bottom: 2px solid #ddd !important;
-        /* ⭐ FIX 3: Ensure headers cannot wrap too much */
         white-space: nowrap !important;
+    }
+    
+    /* ⭐ FIX 1: Remove the light blue background from the Category column header */
+    .expense-table thead th:nth-child(3) {
+        background: #e9e9e9 !important; /* Reset to standard header background */
+        color: #000 !important;
+        font-weight: 800 !important; /* Reset font weight */
     }
 
     table td {
         display: table-cell !important;
-        /* ⭐ FIX 4: Reduce horizontal padding on data cells */
         padding: 8px 6px !important; 
         border-bottom: 1px solid #f0f0f0 !important;
         color: #333 !important;
@@ -207,17 +222,23 @@
     
     /* Ensure the Amount column is narrow */
     table td:nth-child(2) {
-        font-weight: 600 !important; /* Amount column */
+        font-weight: 600 !important;
         color: #000 !important;
-        white-space: nowrap !important; /* Prevent wrapping */
+        white-space: nowrap !important;
     }
 
+    /* ⭐ FIX 2: Remove the light background from the Category column data cells */
+    .expense-table tbody td:nth-child(3) {
+        background: none !important; /* Reset to transparent/default table background */
+        font-weight: 600 !important; 
+    }
+    
     /* Ensure the Status column is narrow */
-    table td:nth-child(7) { /* Status column */
-        font-size: 7.5pt !important; /* ⭐ FIX 5: Smaller font size for status */
+    table td:nth-child(7) { 
+        font-size: 7.5pt !important; 
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
-        white-space: nowrap !important; /* Prevent wrapping */
+        white-space: nowrap !important;
     }
     
     table tbody tr:hover {
@@ -233,10 +254,66 @@
         background: #fafafa !important;
     }
 
+    /* ======= CATEGORY COLOR SYNCHRONIZATION FIX (Final & Explicit) ======= */
+    
+    .category-badge {
+        display: inline-block !important;
+        padding: 4px 8px !important;
+        border-radius: 4px !important;
+        font-size: 8pt !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        
+        background-color: inherit !important; 
+        color: inherit !important;
+    }
+    
+    /* FINAL FIX: Explicitly set the colors to force printing */
+    
+    /* Cat 1: #FF6B6B (White text) */
+    .cat-color-0 { background-color: #FF6B6B !important; color: white !important; } 
+    /* Cat 2: #4ECDC4 (White text) */
+    .cat-color-1 { background-color: #4ECDC4 !important; color: white !important; } 
+    /* Cat 3: #FFE66D (Dark text) */
+    .cat-color-2 { background-color: #FFE66D !important; color: #1e293b !important; } 
+    /* Cat 4: #A8E6CF (Dark text) */
+    .cat-color-3 { background-color: #A8E6CF !important; color: #1e293b !important; } 
+    /* Cat 5: #C7CEEA (Dark text) */
+    .cat-color-4 { background-color: #C7CEEA !important; color: #1e293b !important; } 
+    /* Cat 6: #FF8B94 (White text) */
+    .cat-color-5 { background-color: #FF8B94 !important; color: white !important; } 
+    /* Cat 7: #B4A7D6 (White text) */
+    .cat-color-6 { background-color: #B4A7D6 !important; color: white !important; } 
+    /* Cat 8: #95E1D3 (Dark text) */
+    .cat-color-7 { background-color: #95E1D3 !important; color: #1e293b !important; } 
+    /* Cat 9: #F38181 (White text) */
+    .cat-color-8 { background-color: #F38181 !important; color: white !important; } 
+    /* Cat 10: #AA96DA (White text) */
+    .cat-color-9 { background-color: #AA96DA !important; color: white !important; }
+
+
     /* ======= Typography Refinements ======= */
     table td:first-child {
-        font-weight: 500 !important; /* Date column */
+        color: #333 !important; 
+        font-weight: 500 !important;
     }
+    
+    /* ======= Status Badges Fix: Ensure colors print ======= */
+    .status-paid {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+        color: #10B981 !important;
+    }
+
+    .status-need-refund {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        color: #EF4444 !important;
+    }
+
+    .status-pending {
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        color: #F59E0B !important;
+    }
+
 
     /* Hide empty states */
     .empty-state, .empty-icon {
