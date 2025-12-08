@@ -157,13 +157,14 @@
         overflow: visible !important;
     }
 
-    /* ======= Minimal Table Design ======= */
+    /* ======= Minimal Table Design (Mobile Print Fixes) ======= */
     table, .expense-table {
         display: table !important;
         width: 100% !important;
         border-collapse: separate !important;
         border-spacing: 0 !important;
-        font-size: 9pt !important;
+        /* ⭐ FIX 1: Reduce overall table font size slightly */
+        font-size: 8.5pt !important; 
         margin-top: 20px !important;
     }
 
@@ -182,24 +183,43 @@
 
     table th {
         display: table-cell !important;
-        padding: 12px 10px !important;
+        /* ⭐ FIX 2: Reduce horizontal padding on headers */
+        padding: 8px 6px !important; 
         text-align: left !important;
-        font-size: 9pt !important;
+        font-size: 8.5pt !important;
         font-weight: 600 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.3px !important;
         color: #666 !important;
         background: #f8f8f8 !important;
         border-bottom: 2px solid #ddd !important;
+        /* ⭐ FIX 3: Ensure headers cannot wrap too much */
+        white-space: nowrap !important;
     }
 
     table td {
         display: table-cell !important;
-        padding: 10px !important;
+        /* ⭐ FIX 4: Reduce horizontal padding on data cells */
+        padding: 8px 6px !important; 
         border-bottom: 1px solid #f0f0f0 !important;
         color: #333 !important;
     }
+    
+    /* Ensure the Amount column is narrow */
+    table td:nth-child(2) {
+        font-weight: 600 !important; /* Amount column */
+        color: #000 !important;
+        white-space: nowrap !important; /* Prevent wrapping */
+    }
 
+    /* Ensure the Status column is narrow */
+    table td:nth-child(7) { /* Status column */
+        font-size: 7.5pt !important; /* ⭐ FIX 5: Smaller font size for status */
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        white-space: nowrap !important; /* Prevent wrapping */
+    }
+    
     table tbody tr:hover {
         background: transparent !important;
     }
@@ -216,18 +236,6 @@
     /* ======= Typography Refinements ======= */
     table td:first-child {
         font-weight: 500 !important; /* Date column */
-    }
-
-    table td:nth-child(2) {
-        font-weight: 600 !important; /* Amount column */
-        color: #000 !important;
-    }
-
-    /* ======= Status badges - minimal ======= */
-    table td:nth-child(7) { /* Status column */
-        font-size: 8pt !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
     }
 
     /* Hide empty states */

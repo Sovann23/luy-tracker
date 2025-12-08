@@ -43,30 +43,43 @@ body {
 }
 
 /* CRITICAL FIX: Khmer Language Support - Keep English bold consistent */
+/* CRITICAL FIX: Khmer Language Support - Keep consistency across devices */
 body[data-language="km"] {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Sans Khmer', 'Khmer OS', sans-serif;
+    /* Use a universally available Khmer font first, followed by fallbacks */
+    font-family: 'Noto Sans Khmer', 'Khmer OS', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 1rem;
 }
 
+/* Enforce maximum boldness (700 or bolder) for all strong/bold text */
 body[data-language="km"] strong,
 body[data-language="km"] b {
-    font-weight: 700;
+    font-weight: 700 !important;
 }
 
+/* Enforce strong font weight on important labels and headers */
 body[data-language="km"] .stat-label,
-body[data-language="km"] label {
-    font-weight: 600;
+body[data-language="km"] label,
+body[data-language="km"] .mobile-nav-btn {
+    font-weight: 600 !important;
 }
 
-body[data-language="km"] .expense-table thead th {
-    font-weight: 700;
-}
-
+/* Key values and main headers */
 body[data-language="km"] .stat-value,
 body[data-language="km"] .table-header h3,
 body[data-language="km"] .chart-header h3,
 body[data-language="km"] .section-header h3,
-body[data-language="km"] .welcome-section h2 {
-    font-weight: 700;
+body[data-language="km"] .welcome-section h2,
+body[data-language="km"] .nav-btn,
+body[data-language="km"] .brand h1,
+body[data-language="km"] .expense-table thead th {
+    font-weight: 700 !important;
+}
+
+/* Ensure data cells and input fields are readable */
+body[data-language="km"] .expense-table tbody td,
+body[data-language="km"] .form-input,
+body[data-language="km"] .filter-input {
+    font-weight: 500;
 }
 
 /* Top Navigation */
