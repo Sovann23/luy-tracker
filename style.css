@@ -1,4 +1,5 @@
-/* Optimized Luy Tracker CSS */
+/* Optimized Luy Tracker CSS - FIXED FOR KHMER CONSISTENCY */
+
 * {
     margin: 0;
     padding: 0;
@@ -42,28 +43,44 @@ body {
     line-height: 1.6;
 }
 
-/* CRITICAL FIX: Khmer Language Support - Keep English bold consistent */
-/* CRITICAL FIX: Khmer Language Support - Keep consistency across devices */
-body[data-language="km"] {
-    /* Use a universally available Khmer font first, followed by fallbacks */
-    font-family: 'Noto Sans Khmer', 'Khmer OS', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    font-size: 1rem;
+/* =================================================================
+   CRITICAL FIX: Khmer Language Support - Universal Consistency
+   ================================================================= */
+
+/* Load Noto Sans Khmer from Google Fonts for ALL devices */
+body[data-language="km"],
+body[data-language="km"] * {
+    font-family: 'Noto Sans Khmer', 'Khmer OS', 'Khmer OS System', 'Khmer OS Battambang', 
+                 'Khmer OS Content', 'Khmer OS Bokor', 'Khmer OS Siemreap', 
+                 -apple-system, BlinkMacSystemFont, sans-serif !important;
+    /* Ensure text is properly anti-aliased on all devices */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
-/* Enforce maximum boldness (700 or bolder) for all strong/bold text */
+/* Base font size - slightly larger for better Khmer readability */
+body[data-language="km"] {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.7;
+}
+
+/* Strong text - MAXIMUM boldness for consistency */
 body[data-language="km"] strong,
 body[data-language="km"] b {
+    font-weight: 800 !important;
+}
+
+/* Critical labels and headers - BOLD */
+body[data-language="km"] .stat-label,
+body[data-language="km"] label,
+body[data-language="km"] .form-group label,
+body[data-language="km"] .mobile-nav-btn {
     font-weight: 700 !important;
 }
 
-/* Enforce strong font weight on important labels and headers */
-body[data-language="km"] .stat-label,
-body[data-language="km"] label,
-body[data-language="km"] .mobile-nav-btn {
-    font-weight: 600 !important;
-}
-
-/* Key values and main headers */
+/* Primary headers and values - EXTRA BOLD */
 body[data-language="km"] .stat-value,
 body[data-language="km"] .table-header h3,
 body[data-language="km"] .chart-header h3,
@@ -71,16 +88,51 @@ body[data-language="km"] .section-header h3,
 body[data-language="km"] .welcome-section h2,
 body[data-language="km"] .nav-btn,
 body[data-language="km"] .brand h1,
-body[data-language="km"] .expense-table thead th {
+body[data-language="km"] .expense-table thead th,
+body[data-language="km"] h1,
+body[data-language="km"] h2,
+body[data-language="km"] h3,
+body[data-language="km"] h4,
+body[data-language="km"] h5,
+body[data-language="km"] h6 {
+    font-weight: 800 !important;
+}
+
+/* Regular text - medium weight for readability */
+body[data-language="km"] .expense-table tbody td,
+body[data-language="km"] .form-input,
+body[data-language="km"] .filter-input,
+body[data-language="km"] p,
+body[data-language="km"] select option {
+    font-weight: 500 !important;
+}
+
+/* Button text - bold for emphasis */
+body[data-language="km"] .btn-submit,
+body[data-language="km"] .action-btn,
+body[data-language="km"] button {
     font-weight: 700 !important;
 }
 
-/* Ensure data cells and input fields are readable */
-body[data-language="km"] .expense-table tbody td,
-body[data-language="km"] .form-input,
-body[data-language="km"] .filter-input {
-    font-weight: 500;
+/* Ensure proper spacing for Khmer text */
+body[data-language="km"] .stat-value,
+body[data-language="km"] h1,
+body[data-language="km"] h2,
+body[data-language="km"] h3 {
+    letter-spacing: 0 !important;
 }
+
+/* Fix for input/select elements - ensure proper rendering */
+body[data-language="km"] input,
+body[data-language="km"] select,
+body[data-language="km"] textarea {
+    font-family: 'Noto Sans Khmer', 'Khmer OS', sans-serif !important;
+    font-weight: 500 !important;
+}
+
+/* =================================================================
+   END KHMER FIXES
+   ================================================================= */
 
 /* Top Navigation */
 .top-navbar {
@@ -813,6 +865,19 @@ body[data-theme="dark"] .list-group-item {
     
     .action-btn {
         width: 100%;
+    }
+    
+    /* Mobile-specific Khmer optimizations */
+    body[data-language="km"] {
+        font-size: 15px;
+    }
+    
+    body[data-language="km"] .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    body[data-language="km"] .nav-btn {
+        font-size: 1.1rem;
     }
 }
 

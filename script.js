@@ -31,7 +31,7 @@ const translations = {
         average: 'Average', count: 'Count', categoryBreakdownReport: 'Category Breakdown', manageCategories: 'Manage Categories',
         newCategory: 'New category', add: 'Add', editExpense: 'Edit', deleteBtn: 'Delete', updateExpense: 'Update Expense',
         imported: 'Imported', expense: 'expense',
-        status: 'Status', paid: 'Paid', needRefund: 'Need Refund', pending: 'Pending',
+        status: 'Status (Optional)', paid: 'Paid', needRefund: 'Need Refund', pending: 'Pending',
         tableDate: 'Date', tableAmount: 'Amount', tableCategory: 'Category', tableMoneyType: 'Money Type',
         tableType: 'Type', tableDescription: 'Description', tableStatus: 'Status', tableActions: 'Actions',
         tableMonth: 'Month', tableTotal: 'Total', tableAvgDay: 'Avg/Day', tableTrans: 'Transactions', tableHighest: 'Highest'
@@ -39,7 +39,7 @@ const translations = {
     km: {
         dashboard: 'ផ្ទាំងគ្រប់គ្រង', analyticsNav: 'វិភាគ', reportsNav: 'របាយការណ៍', categories: 'ប្រភេទ',
         welcome: 'សូមស្វាគមន៍! 👋', welcomeSub: 'នេះគឺជាការសង្ខេបហិរញ្ញវត្ថុរបស់អ្នក', thisMonth: 'ខែនេះ',
-        total: 'សរុប', dailyAvg: 'ការចំណាយជាមធ្យមក្នុង១ថ្ងៃ', largest: 'ធំបំផុត', categoryBreakdown: 'ការបែងចែកតាមប្រភេទ',
+        total: 'ការចំណាយសរុប', dailyAvg: 'ការចំណាយជាមធ្យមក្នុង១ថ្ងៃ', largest: 'ការចំណាយច្រើនបំផុត', categoryBreakdown: 'ការបែងចែកតាមប្រភេទ',
         monthlyTrend: 'ទំនោរប្រចាំខែ', addExpense: '➕ បន្ថែមការចំណាយថ្មី', date: 'កាលបរិច្ឆេទ', amount: 'ចំនួនទឹកប្រាក់',
         currency: 'រូបិយប័ណ្ណ', moneyType: 'ប្រភេទសាច់ប្រាក់', expenseType: 'ប្រភេទការចំណាយ', category: 'ប្រភេទ',
         description: 'ការពិពណ៌នា', selectType: 'ជ្រើសរើសប្រភេទ', selfMoney: 'ប្រាក់ផ្ទាល់ខ្លួន', houseMoney: 'ប្រាក់ផ្ទះ',
@@ -47,14 +47,14 @@ const translations = {
         recentTrans: 'ប្រតិបត្តិការថ្មីៗ', search: 'ស្វែងរក...', allTime: 'គ្រប់ពេលវេលា', actions: 'សកម្មភាព',
         noExpenses: 'មិនទាន់មានការចំណាយ។ បន្ថែមការចំណាយដំបូងរបស់អ្នក!', analytics: '📈 ការវិភាគ និងការយល់ដឹង',
         analyticsSub: 'ការវិភាគលម្អិតនៃទម្រង់ការចំណាយរបស់អ្នក', totalSpent: 'សរុបចំណាយ', median: 'មេដ្យាន',
-        expenses: 'ការចំណាយ', moneyTypeChart: 'ប្រភេទប្រាក់', trendChart: 'ទំនោរ ១២ ខែ', categoryDist: 'ការចែកចាយតាមប្រភេទ',
+        expenses: 'ការចំណាយ', moneyTypeChart: 'ប្រភេទប្រាក់', trendChart: 'ការចំណាយក្នុងរយះពេល១២ខែ', categoryDist: 'ការចែកចាយតាមប្រភេទ',
         expenseTypeChart: 'ប្រភេទការចំណាយ', monthlySummary: 'សង្ខេបប្រចាំខែ', month: 'ខែ', avgDay: 'មធ្យម/ថ្ងៃ',
         transactions: 'ប្រតិបត្តិការ', highest: 'ខ្ពស់បំផុត', reports: '📋 របាយការណ៍លម្អិត', reportsSub: 'ការវិភាគកម្រិតខ្ពស់ និងការបែងចែកប្រចាំខែ',
         generateReport: 'បង្កើតរបាយការណ៍', selectMonth: 'ជ្រើសរើសខែ', chooseMonth: 'ជ្រើសរើសខែ...', generate: 'បង្កើត',
         average: 'ការចំណាយជាមធ្យម', count: 'ចំនួនការចំណាយ', categoryBreakdownReport: 'ការបែងចែកតាមប្រភេទ', manageCategories: 'គ្រប់គ្រងប្រភេទ',
         newCategory: 'ប្រភេទថ្មី', add: 'បន្ថែម', editExpense: 'កែសម្រួល', deleteBtn: 'លុប', updateExpense: 'ធ្វើបច្ចុប្បន្នភាពការចំណាយ',
         imported: 'នាំចូល', expense: 'ការចំណាយ',
-        status: 'ស្ថានភាព', paid: 'បានបង់', needRefund: 'ត្រូវសងវិញ', pending: 'កំពុងរង់ចាំ',
+        status: 'ស្ថានភាព (ជម្រើស)', paid: 'បានបង់', needRefund: 'ត្រូវការទូរទាត់', pending: 'កំពុងរង់ចាំ',
         tableDate: 'កាលបរិច្ឆេទ', tableAmount: 'ចំនួនទឹកប្រាក់', tableCategory: 'ប្រភេទ', tableMoneyType: 'ប្រភេទសាច់ប្រាក់',
         tableType: 'ប្រភេទ', tableDescription: 'ការពិពណ៌នា', tableStatus: 'ស្ថានភាព', tableActions: 'សកម្មភាព',
         tableMonth: 'ខែ', tableTotal: 'សរុប', tableAvgDay: 'មធ្យម/ថ្ងៃ', tableTrans: 'ប្រតិបត្តិការ', tableHighest: 'ខ្ពស់បំផុត'
@@ -347,7 +347,7 @@ function updateExpenseTable() {
         const moneyTypeDisplay = expense.moneyType === 'Cash' ? t.selfMoney : t.houseMoney;
         const expenseTypeDisplay = expense.expenseType === 'Cash' ? t.cash : t.bank;
         
-        // Status Display Logic (Already Correct)
+        // Status Display Logic (treat status as optional)
         let statusDisplay = '';
         let statusClass = '';
         if (expense.status === 'Paid') {
@@ -360,9 +360,9 @@ function updateExpenseTable() {
             statusDisplay = `🟡 ${t.pending}`;
             statusClass = 'status-pending';
         } else {
-            // Default status if somehow missing
-            statusDisplay = `🟢 ${t.paid}`;
-            statusClass = 'status-paid';
+            // If status is empty or not provided, show '-' (optional like description)
+            statusDisplay = '-';
+            statusClass = '';
         }
 
         row.innerHTML = `
@@ -774,7 +774,64 @@ function downloadCSV() {
 }
 
 function downloadPDF() {
-    window.print();
+    const title = 'Expense Report - Luy Tracker';
+    // Select the content you want to print
+    const statsGrid = document.getElementById('statsGrid');
+    const recentSection = document.getElementById('recentTransactionsSection');
+    // Assuming the expenses table is inside a .table-responsive within the recentSection
+    const tableWrap = recentSection ? recentSection.querySelector('.table-responsive') : null;
+
+    const statsHtml = statsGrid ? statsGrid.outerHTML : '';
+    const tableHtml = tableWrap ? tableWrap.outerHTML : '';
+
+    // Guard clause: if no content to print, stop.
+    if (!statsHtml && !tableHtml) {
+        console.warn('No content (statsGrid or expenses table) found for PDF export.');
+        return;
+    }
+
+    // 1. Create a print container with absolute positioning far outside the visible area
+    const printContainer = document.createElement('div');
+    printContainer.id = 'luy-print-container';
+    
+    // Set minimal, off-screen style to prevent flicker/glitch
+    printContainer.style.cssText = `
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    `;
+
+    // 2. Populate the container with the content and necessary structure
+    printContainer.innerHTML = `
+        <div style="padding:16px;">
+            <h2 style="text-align:center;margin-bottom:8px">${title}</h2>
+            <div id="print-stats">${statsHtml}</div>
+            <div id="print-table">${tableHtml}</div>
+        </div>
+    `;
+
+    // 3. Append the container to the body
+    document.body.appendChild(printContainer);
+
+    // 4. Trigger print. The content is off-screen, so the user only sees the print dialog.
+    // The existing print.css (linked with media=print) will apply the correct styling.
+    try {
+        window.print();
+    } catch (e) {
+        console.warn('Print failed', e);
+    }
+    
+    // 5. Clean up: After the print dialog is closed/canceled, the timeout will remove the container.
+    // Use a short timeout to ensure the print process has started before removal.
+    setTimeout(() => {
+        if (printContainer.parentNode) {
+            printContainer.parentNode.removeChild(printContainer);
+        }
+    }, 500);
+    // Note: Since the container is off-screen, we no longer need to hide and show the main UI elements.
 }
 
 function importData(e) {

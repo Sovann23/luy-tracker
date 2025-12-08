@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Luy Tracker</title>
+    
+    <!-- Google Fonts for Khmer Support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="print.css" media="print">
-
 </head>
 <body>
     <nav class="top-navbar">
@@ -155,10 +160,12 @@
                                     <option value="">Select category</option>
                                 </select>
                             </div>
-                            </div>
+                        </div>
                         <div class="form-group">
                             <label for="expenseStatus">Status</label>
                             <select id="expenseStatus" class="form-input">
+                                <!-- Optional: leave blank like Description -->
+                                <option value="">--</option>
                                 <option value="Paid">🟢 Paid</option>
                                 <option value="Need Refund">🔴 Need Refund</option>
                                 <option value="Pending">🟡 Pending</option>
@@ -217,7 +224,6 @@
             </div>
         </div>
                     
-
         <div id="analytics-page" class="page-content">
             <div class="container-fluid">
                 <div class="welcome-section">
