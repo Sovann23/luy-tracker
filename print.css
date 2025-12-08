@@ -10,13 +10,35 @@
         color: #1a1a1a !important;
     }
 
+    /* ⭐ FIX 1A: Reduced margin for mobile/narrow print to ensure content fits */
+    @page {
+        margin: 8mm; /* Reduced margin from 10mm to 8mm */
+        size: A4; 
+    }
+
     body {
         margin: 0;
-        padding: 40px;
+        padding: 0; /* Remove body padding */
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-size: 11pt;
         line-height: 1.5;
     }
+    
+    /* ⭐ FIX 2A: Expense Report Title (MOVED TO TOP) */
+    /* Attach the title to the dashboard page to ensure it appears first */
+    #dashboard-page::before {
+        content: "Expense Report";
+        display: block;
+        text-align: center;
+        font-size: 28pt; 
+        font-weight: 700 !important; 
+        letter-spacing: -0.5px;
+        margin-bottom: 40px; /* Space after the title */
+        padding-top: 10px; /* Small pad from the top edge */
+        color: #000 !important;
+        page-break-after: avoid !important; /* Prevent a page break right after the title */
+    }
+
 
     /* Hide UI elements */
     header, nav, .sidebar, .navbar, .top-nav, .top-navbar,
@@ -35,26 +57,15 @@
 
     #dashboard-page {
         display: block !important;
+        /* ⭐ FIX 1B: Ensure the main container fills the available print width */
+        width: 100% !important;
+        padding: 0 5mm !important; /* Add a small horizontal pad inside the page */
     }
 
     /* Hide analytics and reports pages */
     #analytics-page,
     #reports-page {
         display: none !important;
-    }
-
-    /* ======= Minimal Header (BOLD/PROMINENT FIX) ======= */
-    #dashboard-page::before {
-        content: "Expense Report";
-        display: block;
-        text-align: center;
-        font-size: 28pt; 
-        font-weight: 700 !important; 
-        letter-spacing: -0.5px;
-        margin-bottom: 40px; /* Space after the title */
-        padding-top: 10px; /* Small pad from the top edge */
-        color: #000 !important;
-        page-break-after: avoid !important; /* Prevent a page break right after the title */
     }
 
     /* ======= Clean Stats Grid (PAGE BREAK FIX) ======= */
@@ -64,7 +75,7 @@
         gap: 20px !important;
         margin: 0 auto 50px auto !important;
         max-width: 900px !important;
-        page-break-inside: avoid !important; /* ⭐ FIX: Keep the entire stats row on one page */
+        page-break-inside: avoid !important; 
     }
 
     .stat-card {
@@ -126,7 +137,7 @@
         max-width: 900px !important; 
         border: 1px solid #e0e0e0 !important; 
         padding: 20px !important;
-        page-break-inside: avoid !important; /* ⭐ FIX: Keep charts from splitting across pages */
+        page-break-inside: avoid !important; 
     }
 
     .chart-header {
@@ -157,19 +168,19 @@
         display: block !important;
     }
 
-    /* ======= Clean Table Section (PAGE BREAK FIX) ======= */
+    /* ======= Clean Table Section (Mobile Overflow Fix) ======= */
     .table-section {
         display: block !important;
         margin-top: 50px !important;
-        page-break-inside: auto !important; /* Allow the section to break, but control internal elements */
-        page-break-before: auto !important; /* Allow break before if necessary */
+        page-break-inside: auto !important; 
+        page-break-before: auto !important; 
     }
     
     .table-responsive {
         overflow: visible !important;
     }
 
-    /* ======= Minimal Table Design (Mobile Overflow Fix) ======= */
+    /* ======= Minimal Table Design (Table Sizing) ======= */
     table, .expense-table {
         display: table !important;
         width: 100% !important;
@@ -190,7 +201,7 @@
 
     table tr {
         display: table-row !important;
-        page-break-inside: avoid !important; /* ⭐ FIX: Prevent a single row from splitting */
+        page-break-inside: avoid !important; 
     }
 
     table th {
@@ -207,7 +218,7 @@
         white-space: nowrap !important;
     }
     
-    /* FIX: Category column header (Reset background color) */
+    /* FIX: Category column header */
     .expense-table thead th:nth-child(3) {
         background: #e9e9e9 !important; 
         color: #000 !important;
@@ -231,7 +242,7 @@
         width: 15% !important;
     }
 
-    /* FIX: Category column data cells (Reset background color) */
+    /* FIX: Category column data cells */
     .expense-table tbody td:nth-child(3) {
         background: none !important; 
         font-weight: 600 !important; 
@@ -343,11 +354,6 @@
     }
 
     /* ======= Page optimization ======= */
-    @page {
-        margin: 10mm; 
-        size: A4; 
-    }
-
     .page-content:last-child {
         page-break-after: auto;
     }
