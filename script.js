@@ -868,12 +868,21 @@ function importData(e) {
         const headers = Object.keys(firstRow);
         
         const findColumn = (enKey, kmKey) => {
+            const lowerKmKey = kmKey ? kmKey.toLowerCase() : null;
+            const lowerEnKey = enKey.toLowerCase();
+            
             if (firstRow[enKey] !== undefined) return enKey;
-            if (firstRow[kmKey] !== undefined) return kmKey;
-            const found = headers.find(h => 
-                h.toLowerCase().includes(enKey.toLowerCase()) ||
-                h.includes(kmKey)
-            );
+            
+            const found = headers.find(h => {
+                const lowerH = String(h).trim().toLowerCase();
+                
+                if (lowerKmKey && lowerH === lowerKmKey) return true;
+                if (lowerH.includes(lowerEnKey)) return true;
+                if (lowerKmKey && lowerH.includes(lowerKmKey)) return true;
+
+                return false;
+            });
+            
             return found || enKey; 
         };
 
@@ -886,12 +895,13 @@ function importData(e) {
         const descCol = findColumn('Description', t_km.tableDescription);
         const statusCol = findColumn('Status', t_km.tableStatus || 'Status'); 
         
-        // --- Step 2: Define Translation Mapping Logic ---
         try {
             const mapType = (val, typeKey) => {
                 const original = String(val || '').trim();
                 const lower = original.toLowerCase();
-                if (!original) return (typeKey === 'status') ? 'Paid' : 'Cash';
+                
+                // If the input is empty or null, return empty string for status, or the default Cash for types
+                if (!original) return (typeKey === 'status') ? '' : 'Cash'; // ⭐️ FIXED: mapType returns '' for status if input is blank
 
                 if (typeKey === 'money') {
                     if (lower.includes(t_en.houseMoney.toLowerCase()) || original.includes(t_km.houseMoney) || lower.includes('house') || lower.includes('bank')) {
@@ -908,12 +918,12 @@ function importData(e) {
                 }
                 
                 if (typeKey === 'status') {
-                    if (lower.includes('refund')) return 'Need Refund';
-                    if (lower.includes('pending')) return 'Pending';
+                    if (lower.includes('refund') || original.includes(t_km.needRefund)) return 'Need Refund';
+                    if (lower.includes('pending') || original.includes(t_km.pending)) return 'Pending';
                     return 'Paid'; 
                 }
                 
-                return 'Cash'; 
+                return ''; // Should not be reached, but safety first
             };
 
             // --- Step 3: Process JSON Data ---
@@ -922,6 +932,9 @@ function importData(e) {
                      console.warn('Skipping row due to missing required data:', row);
                      return null; 
                 }
+
+                // Get the raw status value, defaulting to an empty string if null/undefined
+                const rawStatus = row[statusCol] ? String(row[statusCol]).trim() : ''; 
                 
                 return {
                     date: row[dateCol] instanceof Date 
@@ -933,7 +946,10 @@ function importData(e) {
                     category: String(row[categoryCol]),
                     moneyType: mapType(row[moneyTypeCol], 'money'),
                     expenseType: mapType(row[expenseTypeCol], 'expense'),
-                    status: row[statusCol] ? mapType(row[statusCol], 'status') : 'Paid',
+                    
+                    // ⭐️ FIXED: If rawStatus is empty, save as empty string. Otherwise, map the status.
+                    status: rawStatus ? mapType(rawStatus, 'status') : '',
+                        
                     note: String(row[descCol] || ''),
                     id: Date.now() + Math.random()
                 };
@@ -998,10 +1014,15 @@ function clearAllExpenses() {
 }
 
 // --- EXPENSE CRUD FUNCTIONS (FIXED) ---
+// Located in script.js (around line 1050, depending on previous edits)
+// Located in script.js (inside openEditModal function)
 
 function openEditModal(index) {
     const expense = expenses[index];
     if (!expense) return;
+    
+    // Get translations
+    const t = translations[currentLanguage];
 
     // Store the index globally for the update function
     currentEditIndex = index;
@@ -1017,8 +1038,22 @@ function openEditModal(index) {
     document.getElementById("editExpenseMoneyType").value = expense.moneyType;
     document.getElementById("editExpenseType").value = expense.expenseType;
     
-    // ⭐ STATUS FIX: Read the expense status and populate the modal select
-    document.getElementById("editExpenseStatus").value = expense.status || 'Paid'; 
+    // ⭐️ STATUS FIX: Ensure a blank option is available and prevent 'undefined' text
+    const statusSelect = document.getElementById("editExpenseStatus");
+    
+    // 1. Define the placeholder text, using 'Select Status' as a fallback
+    const statusPlaceholder = t.selectStatus || '--';
+
+    // 2. Reset the select content using the robust placeholder
+    statusSelect.innerHTML = `
+        <option value="">${statusPlaceholder}</option> 
+        <option value="Paid">${t.paid}</option>
+        <option value="Pending">${t.pending}</option>
+        <option value="Need Refund">${t.needRefund}</option>
+    `;
+
+    // 3. Set the current status value from the expense object, defaulting to blank string
+    statusSelect.value = expense.status || ''; 
     
     document.getElementById("editExpenseNote").value = expense.note;
 
