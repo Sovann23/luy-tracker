@@ -45,6 +45,16 @@
         padding: 0 !important; 
     }
 
+    /* During print-prep we move dashboard off-screen for normal view.
+       Force it back into the printable flow for PDF rendering. */
+    body.print-prep #dashboard-page {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        width: 100% !important;
+        z-index: auto !important;
+    }
+
     /* Hide analytics and reports pages */
     #analytics-page,
     #reports-page {
@@ -127,8 +137,8 @@
     .charts-grid {
         display: grid !important;
         grid-template-columns: 1fr !important; 
-        gap: 40px !important; 
-        margin: 40px auto 50px auto !important;
+        gap: 22px !important; 
+        margin: 28px auto 34px auto !important;
         max-width: 900px !important; 
     }
     
@@ -159,6 +169,7 @@
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
+        padding: 0 !important;
     }
 
     .chart-body canvas {
@@ -166,6 +177,17 @@
         max-height: 400px !important;
         margin: 0 auto !important;
         display: block !important;
+    }
+
+    /* Keep both chart cards consistent width and balanced height in print */
+    #dashboard-page .charts-grid .chart-card {
+        max-width: 900px !important;
+        margin: 0 auto !important;
+    }
+
+    #dashboard-page .charts-grid .chart-card .chart-body {
+        height: 260px !important;
+        min-height: 260px !important;
     }
 
     /* ======= Clean Table Section (Mobile Overflow Fix) ======= */
@@ -320,6 +342,19 @@
         padding: 2px 4px !important;
         /* Reduce font size slightly */
         font-size: 7pt !important;
+    }
+
+    .status-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0 !important;
+        min-width: 100px !important;
+        text-align: center !important;
+    }
+
+    .status-dot {
+        display: none !important;
     }
 
     .status-paid {
