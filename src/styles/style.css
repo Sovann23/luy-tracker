@@ -562,6 +562,12 @@ select.filter-input {
     cursor: pointer;
 }
 
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
 .expense-table {
     width: 100%;
     border-collapse: collapse;
@@ -1016,6 +1022,126 @@ body[data-theme="dark"] .list-group-item {
     
     body[data-language="km"] .nav-btn {
         font-size: 1.1rem;
+    }
+
+    /* Recent transactions: stack as labeled cards (fixes fixed-layout overlap on narrow screens) */
+    .dashboard-table {
+        table-layout: auto;
+        width: 100%;
+        display: block;
+    }
+
+    .dashboard-table thead {
+        display: none;
+    }
+
+    .dashboard-table tbody,
+    .dashboard-table tbody tr.expense-row {
+        display: block;
+        width: 100%;
+    }
+
+    .dashboard-table tbody tr.expense-row {
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        padding: 0.5rem 1rem;
+        background: var(--bg-main);
+    }
+
+    body[data-theme="dark"] .dashboard-table tbody tr.expense-row {
+        background: var(--bg-hover);
+    }
+
+    .dashboard-table tbody tr.expense-row:hover {
+        background: var(--bg-hover);
+    }
+
+    body[data-theme="dark"] .dashboard-table tbody tr.expense-row:hover {
+        background: #334155;
+    }
+
+    .dashboard-table tbody tr.expense-row td {
+        display: grid;
+        grid-template-columns: minmax(0, 38%) minmax(0, 1fr);
+        gap: 0.5rem 0.75rem;
+        align-items: start;
+        padding: 0.65rem 0;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: top;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .dashboard-table tbody tr.expense-row td:last-child {
+        border-bottom: none;
+    }
+
+    .dashboard-table tbody tr.expense-row td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-secondary);
+        line-height: 1.35;
+        padding-top: 0.15rem;
+    }
+
+    .dashboard-table .dashboard-cell-value {
+        min-width: 0;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        text-align: left;
+    }
+
+    .dashboard-table tbody tr.expense-row .actions-cell .dashboard-cell-value {
+        justify-self: stretch;
+        width: 100%;
+    }
+
+    .dashboard-table tbody tr.expense-row .actions-cell .action-btns {
+        flex-direction: column;
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .dashboard-table tbody tr.expense-row .actions-cell .action-btn {
+        width: 100%;
+        white-space: normal;
+    }
+
+    .dashboard-table tbody tr.expense-row .status-badge {
+        min-width: 0;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .dashboard-table tbody tr:has(td.empty-state) {
+        border: none;
+        padding: 0;
+        margin-bottom: 0;
+        background: transparent;
+    }
+
+    .dashboard-table tbody tr:has(td.empty-state):hover {
+        background: transparent;
+    }
+
+    .dashboard-table tbody tr:has(td.empty-state) td {
+        display: block;
+        border: none;
+        padding: 3rem 1.5rem;
+        text-align: center;
+    }
+
+    .dashboard-table tbody tr:has(td.empty-state) td::before {
+        display: none;
+    }
+
+    /* Wider tables (e.g. monthly summary): allow horizontal scroll instead of crushing columns */
+    .table-responsive .expense-table:not(.dashboard-table) {
+        min-width: 480px;
     }
 }
 

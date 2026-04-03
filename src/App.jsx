@@ -849,35 +849,53 @@ export default function App() {
                       const index = categories.indexOf(expense.category);
                       return (
                         <tr key={expense.id} className="expense-row">
-                          <td>{formatDate(expense.date, language)}</td>
-                          <td>
-                            <strong>{expense.amount.toLocaleString()} {expense.currency}</strong>
-                            {expense.currency !== 'USD' && <><br /><small>(${convertCurrency(expense.amount, expense.currency, 'USD').toFixed(2)})</small></>}
+                          <td data-label={t.tableDate}>
+                            <span className="dashboard-cell-value">{formatDate(expense.date, language)}</span>
                           </td>
-                          <td><span className={`category-badge cat-color-${(index < 0 ? 0 : index) % categoryColors.length}`}>{expense.category}</span></td>
-                          <td>{expense.moneyType === 'Cash' ? t.selfMoney : t.houseMoney}</td>
-                          <td>{expense.expenseType === 'Cash' ? t.cash : t.bank}</td>
-                          <td>{expense.note || '-'}</td>
-                          <td>
-                            <span className={`status-badge ${getStatusClass(expense.status)}`}>
-                              {expense.status && (
-                                <span className={`status-dot ${
-                                  expense.status === 'Paid'
-                                    ? 'icon-green'
-                                    : expense.status === 'Pending'
-                                      ? 'icon-orange'
-                                      : 'icon-red'
-                                }`}
-                                />
-                              )}
-                              {getStatusLabel(expense.status, t)}
+                          <td data-label={t.tableAmount}>
+                            <span className="dashboard-cell-value">
+                              <strong>{expense.amount.toLocaleString()} {expense.currency}</strong>
+                              {expense.currency !== 'USD' && <><br /><small>(${convertCurrency(expense.amount, expense.currency, 'USD').toFixed(2)})</small></>}
                             </span>
                           </td>
-                          <td className="no-print actions-cell">
-                            <div className="action-btns">
-                              <button className="action-btn edit-btn" onClick={() => openEdit(expense)}>{t.editExpense}</button>
-                              <button className="action-btn danger delete-btn" onClick={() => deleteExpense(expense.id)}>{t.deleteBtn}</button>
-                            </div>
+                          <td data-label={t.tableCategory}>
+                            <span className="dashboard-cell-value">
+                              <span className={`category-badge cat-color-${(index < 0 ? 0 : index) % categoryColors.length}`}>{expense.category}</span>
+                            </span>
+                          </td>
+                          <td data-label={t.tableMoneyType}>
+                            <span className="dashboard-cell-value">{expense.moneyType === 'Cash' ? t.selfMoney : t.houseMoney}</span>
+                          </td>
+                          <td data-label={t.tableType}>
+                            <span className="dashboard-cell-value">{expense.expenseType === 'Cash' ? t.cash : t.bank}</span>
+                          </td>
+                          <td data-label={t.tableDescription}>
+                            <span className="dashboard-cell-value">{expense.note || '-'}</span>
+                          </td>
+                          <td data-label={t.tableStatus}>
+                            <span className="dashboard-cell-value">
+                              <span className={`status-badge ${getStatusClass(expense.status)}`}>
+                                {expense.status && (
+                                  <span className={`status-dot ${
+                                    expense.status === 'Paid'
+                                      ? 'icon-green'
+                                      : expense.status === 'Pending'
+                                        ? 'icon-orange'
+                                        : 'icon-red'
+                                  }`}
+                                  />
+                                )}
+                                {getStatusLabel(expense.status, t)}
+                              </span>
+                            </span>
+                          </td>
+                          <td data-label={t.tableActions} className="no-print actions-cell">
+                            <span className="dashboard-cell-value">
+                              <div className="action-btns">
+                                <button className="action-btn edit-btn" onClick={() => openEdit(expense)}>{t.editExpense}</button>
+                                <button className="action-btn danger delete-btn" onClick={() => deleteExpense(expense.id)}>{t.deleteBtn}</button>
+                              </div>
+                            </span>
                           </td>
                         </tr>
                       );
