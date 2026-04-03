@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Chart } from 'chart.js/auto';
 import * as XLSX from 'xlsx';
@@ -25,6 +25,35 @@ const defaultForm = {
   note: ''
 };
 
+function normalizeExpenseDate(dateValue) {
+  if (!dateValue) return '';
+
+  if (dateValue instanceof Date && !Number.isNaN(dateValue.getTime())) {
+    const y = dateValue.getFullYear();
+    const m = String(dateValue.getMonth() + 1).padStart(2, '0');
+    const d = String(dateValue.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  const raw = String(dateValue).trim();
+
+  const ymd = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (ymd) {
+    const y = ymd[1];
+    const m = String(Number.parseInt(ymd[2], 10)).padStart(2, '0');
+    const d = String(Number.parseInt(ymd[3], 10)).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return raw;
+
+  const y = parsed.getFullYear();
+  const m = String(parsed.getMonth() + 1).padStart(2, '0');
+  const d = String(parsed.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function loadJSON(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -39,16 +68,57 @@ function Icon({ name, className = '' }) {
 }
 
 function getExpenseMonthKey(expenseDate) {
-  if (!expenseDate) return '';
-  const raw = String(expenseDate);
-  if (/^\d{4}-\d{2}/.test(raw)) return raw.slice(0, 7);
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return '';
-  return parsed.toISOString().slice(0, 7);
+  const normalized = normalizeExpenseDate(expenseDate);
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized.slice(0, 7) : '';
+}
+
+function sortByDateDesc(a, b) {
+  const ad = normalizeExpenseDate(a.date);
+  const bd = normalizeExpenseDate(b.date);
+  return bd.localeCompare(ad);
+}
+
+function buildReportData(reportRows) {
+  const total = reportRows.reduce((sum, e) => sum + convertCurrency(e.amount, e.currency, 'USD'), 0);
+  const avg = reportRows.length ? total / reportRows.length : 0;
+  const highest = reportRows.length
+    ? Math.max(...reportRows.map((e) => convertCurrency(e.amount, e.currency, 'USD')))
+    : 0;
+
+  const catTotals = {};
+  const statusTotals = { Paid: 0, Pending: 0, 'Need Refund': 0, Unknown: 0 };
+  const moneyTypeTotals = { Cash: 0, Bank: 0 };
+
+  reportRows.forEach((e) => {
+    const usd = convertCurrency(e.amount, e.currency, 'USD');
+    moneyTypeTotals[e.moneyType] = (moneyTypeTotals[e.moneyType] || 0) + usd;
+    catTotals[e.category] = (catTotals[e.category] || 0) + convertCurrency(e.amount, e.currency, 'USD');
+    if (!e.status) statusTotals.Unknown += usd;
+    else statusTotals[e.status] = (statusTotals[e.status] || 0) + usd;
+  });
+
+  return {
+    total,
+    avg,
+    count: reportRows.length,
+    highest,
+    rows: reportRows,
+    categories: Object.entries(catTotals)
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, amount]) => ({
+        category,
+        amount,
+        pct: total ? (amount / total) * 100 : 0
+      })),
+    statusTotals,
+    moneyTypeTotals
+  };
 }
 
 export default function App() {
-  const [expenses, setExpenses] = useState(() => loadJSON('expenses', []));
+  const [expenses, setExpenses] = useState(() =>
+    loadJSON('expenses', []).map((e) => ({ ...e, date: normalizeExpenseDate(e.date) }))
+  );
   const [categories, setCategories] = useState(() => {
     const saved = loadJSON('categories', defaultCategories);
     return Array.isArray(saved) && saved.length ? saved : defaultCategories;
@@ -131,6 +201,30 @@ export default function App() {
       .reverse();
   }, [expenses]);
 
+  const getReportRows = useCallback(() => {
+    if (reportScope === 'all') {
+      return [...expenses].sort(sortByDateDesc);
+    }
+    if (!reportMonth) return [];
+    return expenses
+      .filter((e) => getExpenseMonthKey(e.date) === reportMonth)
+      .sort(sortByDateDesc);
+  }, [expenses, reportMonth, reportScope]);
+
+  useEffect(() => {
+    if (activePage !== 'reports') return;
+    if (reportScope === 'month' && !reportMonth) {
+      setReportData(null);
+      return;
+    }
+    const rows = getReportRows();
+    if (!rows.length) {
+      setReportData(null);
+      return;
+    }
+    setReportData(buildReportData(rows));
+  }, [activePage, getReportRows]);
+
   const dashboardFilteredExpenses = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
     return expenses
@@ -139,19 +233,29 @@ export default function App() {
           !search ||
           (e.note || '').toLowerCase().includes(search) ||
           (e.category || '').toLowerCase().includes(search);
-        const monthMatch = !filterMonth || e.date.startsWith(filterMonth);
+        // Use the same month-key helper for consistent formatting
+        // (prevents mixing months when imported dates aren't zero-padded).
+        const monthMatch = !filterMonth || getExpenseMonthKey(e.date) === filterMonth;
         return searchMatch && monthMatch;
       })
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+      .sort(sortByDateDesc);
   }, [expenses, filterMonth, searchTerm]);
 
+  // For print/PDF table rendering, use the exact rows captured at download time.
+  // Ensure rows are from the selected month only if in month-specific mode.
   const normalizedPrintRows = useMemo(() => {
     if (!printOverrideRows) return null;
+    // Filter to selected month if in month-specific report mode (matches downloadPDF logic)
     if (reportScope === 'month' && reportMonth) {
       return printOverrideRows.filter((e) => getExpenseMonthKey(e.date) === reportMonth);
     }
     return printOverrideRows;
   }, [printOverrideRows, reportMonth, reportScope]);
+
+  // Clear PDF preview rows when report filters change (not on tab change — that could wipe rows mid-print).
+  useEffect(() => {
+    setPrintOverrideRows(null);
+  }, [reportScope, reportMonth]);
 
   const dashboardStats = useMemo(() => {
     const currentMonth = new Date().toISOString().slice(0, 7);
@@ -200,7 +304,7 @@ export default function App() {
 
   const monthlySummary = useMemo(() => {
     return monthOptions.map((month) => {
-      const monthExpenses = expenses.filter((e) => e.date.startsWith(month));
+      const monthExpenses = expenses.filter((e) => getExpenseMonthKey(e.date) === month);
       const total = monthExpenses.reduce((sum, e) => sum + convertCurrency(e.amount, e.currency, 'USD'), 0);
       const daysInMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
       const avgDay = total / daysInMonth;
@@ -209,14 +313,14 @@ export default function App() {
     });
   }, [expenses, monthOptions]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!categoryChartRef.current || !monthlyChartRef.current) return;
 
     if (!categoryChartInst.current) {
       categoryChartInst.current = new Chart(categoryChartRef.current, {
         type: 'doughnut',
         data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0, spacing: 0, hoverOffset: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: { responsive: true, maintainAspectRatio: true, cutout: '65%', radius: '90%', plugins: { legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 }, usePointStyle: true } } }, layout: { padding: 0 } }
       });
     }
 
@@ -239,7 +343,7 @@ export default function App() {
       });
     }
 
-    const source = normalizedPrintRows || expenses.filter((e) => !filterMonth || e.date.startsWith(filterMonth));
+    const source = printOverrideRows || expenses.filter((e) => !filterMonth || getExpenseMonthKey(e.date) === filterMonth);
     const totals = {};
     categories.forEach((c) => {
       totals[c] = 0;
@@ -265,21 +369,22 @@ export default function App() {
     categoryChartInst.current.data.datasets[0].backgroundColor = colors;
     categoryChartInst.current.update();
 
-    const lastSeven = getMonthKeys(7);
-    const monthlyTotals = Object.fromEntries(lastSeven.map((m) => [m, 0]));
-    expenses.forEach((e) => {
-      const key = e.date.slice(0, 7);
+    const trendKeys = getMonthKeys(7);
+    const monthlyTotals = Object.fromEntries(trendKeys.map((m) => [m, 0]));
+    const trendSource = expenses;
+    trendSource.forEach((e) => {
+      const key = getExpenseMonthKey(e.date);
       if (monthlyTotals[key] !== undefined) {
         monthlyTotals[key] += convertCurrency(e.amount, e.currency, 'USD');
       }
     });
 
-    monthlyChartInst.current.data.labels = lastSeven.map((m) =>
-      new Date(`${m}-02`).toLocaleDateString(language === 'km' ? 'km-KH' : 'en-US', { month: 'short', year: '2-digit' })
+    monthlyChartInst.current.data.labels = trendKeys.map((m) =>
+      new Date(`${m}-02`).toLocaleDateString(language === 'km' ? 'km-KH' : 'en-US', { month: 'short' })
     );
-    monthlyChartInst.current.data.datasets[0].data = lastSeven.map((m) => monthlyTotals[m] || 0);
+    monthlyChartInst.current.data.datasets[0].data = trendKeys.map((m) => monthlyTotals[m] || 0);
     monthlyChartInst.current.update();
-  }, [categories, expenses, filterMonth, language, normalizedPrintRows]);
+  }, [categories, expenses, filterMonth, language, printOverrideRows]);
 
   useEffect(() => {
     if (activePage !== 'analytics') return;
@@ -289,7 +394,7 @@ export default function App() {
       moneyTypeChartInst.current = new Chart(moneyTypeChartRef.current, {
         type: 'doughnut',
         data: { labels: [t.selfMoney, t.houseMoney], datasets: [{ data: [], backgroundColor: ['#10B981', '#3B82F6'] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: { responsive: true, maintainAspectRatio: true, cutout: '65%', radius: '90%', plugins: { legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 }, usePointStyle: true } } }, layout: { padding: 0 } }
       });
     }
 
@@ -313,7 +418,7 @@ export default function App() {
       expenseTypeChartInst.current = new Chart(expenseTypeChartRef.current, {
         type: 'doughnut',
         data: { labels: [t.cash, t.bank], datasets: [{ data: [], backgroundColor: ['#F59E0B', '#EC4899'] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: { responsive: true, maintainAspectRatio: true, cutout: '65%', radius: '90%', plugins: { legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 }, usePointStyle: true } } }, layout: { padding: 0 } }
       });
     }
 
@@ -363,13 +468,13 @@ export default function App() {
     });
 
     trendChartInst.current.data.labels = trendMonths.map((m) =>
-      new Date(`${m}-02`).toLocaleDateString(language === 'km' ? 'km-KH' : 'en-US', { month: 'short', year: '2-digit' })
+      new Date(`${m}-02`).toLocaleDateString(language === 'km' ? 'km-KH' : 'en-US', { month: 'short' })
     );
     trendChartInst.current.data.datasets[0].data = trendMonths.map((m) => trendTotals[m] || 0);
     trendChartInst.current.update();
   }, [activePage, categories, expenses, language, t.bank, t.cash, t.houseMoney, t.selfMoney]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (activePage !== 'reports' || !reportData) return;
     if (!reportCategoryChartRef.current || !reportStatusChartRef.current || !reportMoneyTypeChartRef.current) return;
 
@@ -377,7 +482,7 @@ export default function App() {
       reportCategoryChartInst.current = new Chart(reportCategoryChartRef.current, {
         type: 'doughnut',
         data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: { responsive: true, maintainAspectRatio: true, cutout: '65%', radius: '90%', plugins: { legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 }, usePointStyle: true } } }, layout: { padding: 0 } }
       });
     }
 
@@ -393,15 +498,16 @@ export default function App() {
       reportMoneyTypeChartInst.current = new Chart(reportMoneyTypeChartRef.current, {
         type: 'pie',
         data: { labels: [t.selfMoney, t.houseMoney], datasets: [{ data: [], backgroundColor: ['#3B82F6', '#10B981'] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: { responsive: true, maintainAspectRatio: true, radius: '90%', plugins: { legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 }, usePointStyle: true } } }, layout: { padding: 0 } }
       });
     }
 
     reportCategoryChartInst.current.data.labels = reportData.categories.map((c) => c.category);
     reportCategoryChartInst.current.data.datasets[0].data = reportData.categories.map((c) => c.amount);
-    reportCategoryChartInst.current.data.datasets[0].backgroundColor = reportData.categories.map(
-      (_, i) => categoryColors[i % categoryColors.length]
-    );
+    reportCategoryChartInst.current.data.datasets[0].backgroundColor = reportData.categories.map((c) => {
+      const idx = categories.indexOf(c.category);
+      return categoryColors[(idx >= 0 ? idx : 0) % categoryColors.length] || '#94A3B8';
+    });
     reportCategoryChartInst.current.update();
 
     reportStatusChartInst.current.data.labels = [t.paid, t.pending, t.needRefund, 'Unknown'];
@@ -419,7 +525,7 @@ export default function App() {
       reportData.moneyTypeTotals.Bank || 0
     ];
     reportMoneyTypeChartInst.current.update();
-  }, [activePage, reportData, t.houseMoney, t.needRefund, t.paid, t.pending, t.selfMoney]);
+  }, [activePage, categories, reportData, t.houseMoney, t.needRefund, t.paid, t.pending, t.selfMoney]);
 
   useEffect(() => {
     return () => {
@@ -448,6 +554,7 @@ export default function App() {
 
     const newExpense = {
       ...form,
+      date: normalizeExpenseDate(form.date),
       amount: Number.parseFloat(form.amount),
       id: Date.now() + Math.random()
     };
@@ -476,7 +583,7 @@ export default function App() {
     setExpenses((prev) =>
       prev.map((item) =>
         item.id === editingId
-          ? { ...item, ...editForm, amount: Number.parseFloat(editForm.amount) }
+          ? { ...item, ...editForm, date: normalizeExpenseDate(editForm.date), amount: Number.parseFloat(editForm.amount) }
           : item
       )
     );
@@ -547,12 +654,47 @@ export default function App() {
       window.alert(t.selectMonth);
       return;
     }
-    const rowsToPrint = getReportRows();
+    const baseRowsToPrint = getReportRows();
+    const rowsToPrint =
+      reportScope === 'month' && reportMonth
+        ? baseRowsToPrint.filter((e) => getExpenseMonthKey(e.date) === reportMonth)
+        : baseRowsToPrint;
 
     if (!rowsToPrint.length) {
       window.alert(t.noExpenses);
       return;
     }
+
+    // Build chart datasets from exactly the selected rows (no cross-month mix).
+    const printCategoryTotals = {};
+    categories.forEach((c) => {
+      printCategoryTotals[c] = 0;
+    });
+    rowsToPrint.forEach((e) => {
+      const usd = convertCurrency(e.amount, e.currency, 'USD');
+      printCategoryTotals[e.category] = (printCategoryTotals[e.category] || 0) + usd;
+    });
+    const printCatLabels = [];
+    const printCatData = [];
+    const printCatColors = [];
+    categories.forEach((c, idx) => {
+      if (printCategoryTotals[c] > 0) {
+        printCatLabels.push(c);
+        printCatData.push(printCategoryTotals[c]);
+        printCatColors.push(categoryColors[idx % categoryColors.length]);
+      }
+    });
+
+    // PDF monthly trend should always show the rolling full trend.
+    const trendMonthKeys = getMonthKeys(7);
+    const trendTotals = Object.fromEntries(trendMonthKeys.map((m) => [m, 0]));
+    const trendSource = expenses;
+    trendSource.forEach((e) => {
+      const mk = getExpenseMonthKey(e.date);
+      if (trendTotals[mk] !== undefined) {
+        trendTotals[mk] += convertCurrency(e.amount, e.currency, 'USD');
+      }
+    });
 
     flushSync(() => {
       setPrintOverrideRows(rowsToPrint);
@@ -561,45 +703,98 @@ export default function App() {
 
     try {
       if (categoryChartInst.current) {
-        categoryChartInst.current.options.animation = false;
-        categoryChartInst.current.options.elements = {
-          ...(categoryChartInst.current.options.elements || {}),
-          arc: {
-            ...((categoryChartInst.current.options.elements && categoryChartInst.current.options.elements.arc) || {}),
-            borderWidth: 0,
-            borderAlign: 'inner'
-          }
-        };
-        categoryChartInst.current.resize();
-        categoryChartInst.current.update('none');
+        categoryChartInst.current.destroy();
+        categoryChartInst.current = null;
       }
+      if (categoryChartRef.current) {
+        categoryChartInst.current = new Chart(categoryChartRef.current, {
+          type: 'doughnut',
+          data: {
+            labels: printCatLabels,
+            datasets: [{
+              data: printCatData,
+              backgroundColor: printCatColors,
+              borderWidth: 0,
+              spacing: 0,
+              hoverOffset: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1,
+            cutout: '65%',
+            radius: '90%',
+            animation: false,
+            plugins: { legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 }, usePointStyle: true } } }
+          }
+        });
+      }
+
       if (monthlyChartInst.current) {
-        monthlyChartInst.current.options.animation = false;
-        monthlyChartInst.current.resize();
-        monthlyChartInst.current.update('none');
+        monthlyChartInst.current.destroy();
+        monthlyChartInst.current = null;
+      }
+      if (monthlyChartRef.current) {
+        monthlyChartInst.current = new Chart(monthlyChartRef.current, {
+          type: 'line',
+          data: {
+            labels: trendMonthKeys.map((m) =>
+              new Date(`${m}-02`).toLocaleDateString(language === 'km' ? 'km-KH' : 'en-US', {
+                month: 'short',
+                year: trendMonthKeys.length === 1 ? 'numeric' : undefined
+              })
+            ),
+            datasets: [{
+              label: 'Expenses',
+              data: trendMonthKeys.map((m) => trendTotals[m] || 0),
+              borderColor: '#3B82F6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: true,
+              tension: 0.4,
+              borderWidth: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: false } }
+          }
+        });
       }
     } catch (error) {
       console.error('Chart prep failed before print', error);
     }
 
+    let cleaned = false;
+    let fallbackTimer = null;
+
     const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
       setPrintOverrideRows(null);
       document.body.classList.remove('print-prep');
+      window.removeEventListener('afterprint', onAfterPrint);
+      if (fallbackTimer) {
+        clearTimeout(fallbackTimer);
+      }
     };
-    // Keep selected print rows stable during preview. Some browsers fire
-    // afterprint too early, which can reset data before preview snapshot.
-    setTimeout(cleanup, 60000);
-    window.print();
-  }
 
-  function getReportRows() {
-    if (reportScope === 'all') {
-      return [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
-    }
-    if (!reportMonth) return [];
-    return expenses
-      .filter((e) => getExpenseMonthKey(e.date) === reportMonth)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    const onAfterPrint = () => {
+      cleanup();
+    };
+
+    window.addEventListener('afterprint', onAfterPrint);
+    // Final safety cleanup if browser never emits afterprint.
+    fallbackTimer = setTimeout(cleanup, 15 * 60 * 1000);
+    // Let the browser paint updated table + charts before print/PDF (especially mobile Safari).
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+      });
+    });
   }
 
   function onImportClick() {
@@ -657,7 +852,7 @@ export default function App() {
             if (!row[dateCol] || row[amountCol] === undefined || !row[categoryCol]) return null;
             const rawStatus = row[statusCol] ? String(row[statusCol]).trim() : '';
             return {
-              date: row[dateCol] instanceof Date ? row[dateCol].toISOString().split('T')[0] : String(row[dateCol]).split('T')[0],
+              date: normalizeExpenseDate(row[dateCol]),
               amount: Number.parseFloat(row[amountCol]),
               currency: row[currencyCol] || 'USD',
               category: String(row[categoryCol]),
@@ -704,41 +899,7 @@ export default function App() {
       window.alert(t.noExpenses);
       return;
     }
-
-    const total = reportRows.reduce((sum, e) => sum + convertCurrency(e.amount, e.currency, 'USD'), 0);
-    const avg = reportRows.length ? total / reportRows.length : 0;
-    const highest = reportRows.length
-      ? Math.max(...reportRows.map((e) => convertCurrency(e.amount, e.currency, 'USD')))
-      : 0;
-
-    const catTotals = {};
-    const statusTotals = { Paid: 0, Pending: 0, 'Need Refund': 0, Unknown: 0 };
-    const moneyTypeTotals = { Cash: 0, Bank: 0 };
-
-    reportRows.forEach((e) => {
-      const usd = convertCurrency(e.amount, e.currency, 'USD');
-      moneyTypeTotals[e.moneyType] = (moneyTypeTotals[e.moneyType] || 0) + usd;
-      catTotals[e.category] = (catTotals[e.category] || 0) + convertCurrency(e.amount, e.currency, 'USD');
-      if (!e.status) statusTotals.Unknown += usd;
-      else statusTotals[e.status] = (statusTotals[e.status] || 0) + usd;
-    });
-
-    setReportData({
-      total,
-      avg,
-      count: reportRows.length,
-      highest,
-      rows: reportRows,
-      categories: Object.entries(catTotals)
-        .sort((a, b) => b[1] - a[1])
-        .map(([category, amount]) => ({
-          category,
-          amount,
-          pct: total ? (amount / total) * 100 : 0
-        })),
-      statusTotals,
-      moneyTypeTotals
-    });
+    document.getElementById('reportStats')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   return (
@@ -840,62 +1001,46 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {!((normalizedPrintRows || dashboardFilteredExpenses).length) && (
+                    {!(printOverrideRows ? normalizedPrintRows : dashboardFilteredExpenses).length && (
                       <tr>
                         <td colSpan="8" className="empty-state"><div className="empty-icon"><Icon name="inbox" className="icon-indigo" /></div><p>{t.noExpenses}</p></td>
                       </tr>
                     )}
-                    {(normalizedPrintRows || dashboardFilteredExpenses).map((expense) => {
+                    {(printOverrideRows ? normalizedPrintRows : dashboardFilteredExpenses).map((expense) => {
                       const index = categories.indexOf(expense.category);
                       return (
                         <tr key={expense.id} className="expense-row">
-                          <td data-label={t.tableDate}>
-                            <span className="dashboard-cell-value">{formatDate(expense.date, language)}</span>
+                          <td>{formatDate(expense.date, language)}</td>
+                          <td>
+                            <strong>{expense.amount.toLocaleString()} {expense.currency}</strong>
+                            {expense.currency !== 'USD' && (
+                              <small>{' '}(${convertCurrency(expense.amount, expense.currency, 'USD').toFixed(2)})</small>
+                            )}
                           </td>
-                          <td data-label={t.tableAmount}>
-                            <span className="dashboard-cell-value">
-                              <strong>{expense.amount.toLocaleString()} {expense.currency}</strong>
-                              {expense.currency !== 'USD' && <><br /><small>(${convertCurrency(expense.amount, expense.currency, 'USD').toFixed(2)})</small></>}
+                          <td><span className={`category-badge cat-color-${(index < 0 ? 0 : index) % categoryColors.length}`}>{expense.category}</span></td>
+                          <td>{expense.moneyType === 'Cash' ? t.selfMoney : t.houseMoney}</td>
+                          <td>{expense.expenseType === 'Cash' ? t.cash : t.bank}</td>
+                          <td>{expense.note || '-'}</td>
+                          <td>
+                            <span className={`status-badge ${getStatusClass(expense.status)}`}>
+                              {expense.status && (
+                                <span className={`status-dot ${
+                                  expense.status === 'Paid'
+                                    ? 'icon-green'
+                                    : expense.status === 'Pending'
+                                      ? 'icon-orange'
+                                      : 'icon-red'
+                                }`}
+                                />
+                              )}
+                              {getStatusLabel(expense.status, t)}
                             </span>
                           </td>
-                          <td data-label={t.tableCategory}>
-                            <span className="dashboard-cell-value">
-                              <span className={`category-badge cat-color-${(index < 0 ? 0 : index) % categoryColors.length}`}>{expense.category}</span>
-                            </span>
-                          </td>
-                          <td data-label={t.tableMoneyType}>
-                            <span className="dashboard-cell-value">{expense.moneyType === 'Cash' ? t.selfMoney : t.houseMoney}</span>
-                          </td>
-                          <td data-label={t.tableType}>
-                            <span className="dashboard-cell-value">{expense.expenseType === 'Cash' ? t.cash : t.bank}</span>
-                          </td>
-                          <td data-label={t.tableDescription}>
-                            <span className="dashboard-cell-value">{expense.note || '-'}</span>
-                          </td>
-                          <td data-label={t.tableStatus}>
-                            <span className="dashboard-cell-value">
-                              <span className={`status-badge ${getStatusClass(expense.status)}`}>
-                                {expense.status && (
-                                  <span className={`status-dot ${
-                                    expense.status === 'Paid'
-                                      ? 'icon-green'
-                                      : expense.status === 'Pending'
-                                        ? 'icon-orange'
-                                        : 'icon-red'
-                                  }`}
-                                  />
-                                )}
-                                {getStatusLabel(expense.status, t)}
-                              </span>
-                            </span>
-                          </td>
-                          <td data-label={t.tableActions} className="no-print actions-cell">
-                            <span className="dashboard-cell-value">
-                              <div className="action-btns">
-                                <button className="action-btn edit-btn" onClick={() => openEdit(expense)}>{t.editExpense}</button>
-                                <button className="action-btn danger delete-btn" onClick={() => deleteExpense(expense.id)}>{t.deleteBtn}</button>
-                              </div>
-                            </span>
+                          <td className="no-print actions-cell">
+                            <div className="action-btns">
+                              <button className="action-btn edit-btn" onClick={() => openEdit(expense)}>{t.editExpense}</button>
+                              <button className="action-btn danger delete-btn" onClick={() => deleteExpense(expense.id)}>{t.deleteBtn}</button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -953,22 +1098,27 @@ export default function App() {
         <div id="reports-page" className={`page-content ${activePage === 'reports' ? 'active' : ''}`}>
           <div className="container-fluid">
             <div className="welcome-section"><h2>{t.reports}</h2><p>{t.reportsSub}</p></div>
-            <div className="table-section">
+            <div className="table-section report-generate-section">
               <div className="table-header"><h3>{t.generateReport}</h3></div>
-              <div style={{ padding: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                <div>
-                  <label style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Scope</label>
-                  <select className="form-input" style={{ width: '220px' }} value={reportScope} onChange={(e) => setReportScope(e.target.value)}>
+              <div className="report-filters">
+                <div className="report-field report-field-scope">
+                  <label className="report-field-label" htmlFor="report-scope-select">Scope</label>
+                  <select
+                    id="report-scope-select"
+                    className="form-input report-select"
+                    value={reportScope}
+                    onChange={(e) => setReportScope(e.target.value)}
+                  >
                     <option value="month">Specific Month</option>
                     <option value="all">All Records</option>
                   </select>
                 </div>
                 {reportScope === 'month' && (
-                  <div>
-                    <label style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{t.selectMonth}</label>
+                  <div className="report-field report-field-month">
+                    <label className="report-field-label" htmlFor="report-month-select">{t.selectMonth}</label>
                     <select
-                      className="form-input"
-                      style={{ width: '220px' }}
+                      id="report-month-select"
+                      className="form-input report-select"
                       value={reportMonth}
                       onChange={(e) => {
                         setReportScope('month');
@@ -980,8 +1130,14 @@ export default function App() {
                     </select>
                   </div>
                 )}
-                <button className="action-btn" onClick={generateReport} style={{ width: 'auto' }}><Icon name="bar-chart-fill" className="mr-2" />{t.generate}</button>
-                <button className="action-btn" onClick={downloadPDF} style={{ width: 'auto' }}><Icon name="file-earmark-pdf-fill" className="mr-2" />PDF</button>
+                <div className="report-actions">
+                  <button type="button" className="action-btn report-action-btn" onClick={generateReport}>
+                    <Icon name="bar-chart-fill" className="mr-2" />{t.generate}
+                  </button>
+                  <button type="button" className="action-btn report-action-btn" onClick={downloadPDF}>
+                    <Icon name="file-earmark-pdf-fill" className="mr-2" />PDF
+                  </button>
+                </div>
               </div>
             </div>
 

@@ -8,6 +8,8 @@
         background: none !important;
         box-shadow: none !important;
         color: #1a1a1a !important;
+        animation: none !important;
+        transition: none !important;
     }
 
     /* ⭐ FIX 1A: Reduced margin for ALL print media (desktop and mobile) to ensure content fits edge-to-edge. */
@@ -22,6 +24,8 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-size: 11pt;
         line-height: 1.5;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
     /* Hide UI elements */
@@ -144,6 +148,7 @@
     
     .chart-card {
         display: block !important;
+        width: 100% !important;
         max-width: 900px !important; 
         border: 1px solid #e0e0e0 !important; 
         padding: 20px !important;
@@ -186,8 +191,14 @@
     }
 
     #dashboard-page .charts-grid .chart-card .chart-body {
-        height: 260px !important;
-        min-height: 260px !important;
+        height: 300px !important;
+        min-height: 300px !important;
+    }
+
+    /* Keep category doughnut larger while preserving round aspect */
+    #dashboard-page .charts-grid .chart-card:first-child .chart-body {
+        height: 360px !important;
+        min-height: 360px !important;
     }
 
     /* ======= Clean Table Section (Mobile Overflow Fix) ======= */
@@ -226,6 +237,17 @@
         page-break-inside: avoid !important; 
     }
 
+    /* Prevent React row animation from being captured mid-frame in PDF preview */
+    .expense-row,
+    .expense-table tbody tr,
+    .expense-table tbody td,
+    .status-badge,
+    .category-badge {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+
     table th {
         display: table-cell !important;
         padding: 6px 4px !important; 
@@ -251,7 +273,8 @@
         display: table-cell !important;
         padding: 6px 4px !important; 
         border-bottom: 1px solid #f0f0f0 !important;
-        color: #333 !important;
+        color: #111 !important;
+        font-size: 8pt !important;
         overflow: hidden !important; 
         text-overflow: ellipsis !important; 
     }

@@ -411,10 +411,14 @@ body.print-prep #dashboard-page {
 .chart-body {
     padding: 1.5rem;
     height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .chart-body canvas {
-    max-height: 100%;
+    max-height: 100% !important;
+    max-width: 100% !important;
 }
 
 /* Add Expense Section */
@@ -518,6 +522,76 @@ textarea.form-input {
     overflow: hidden;
 }
 
+/* Native selects need overflow visible so mobile pickers aren’t clipped or offset */
+.table-section.report-generate-section {
+    overflow: visible;
+}
+
+.report-filters {
+    padding: 1.25rem 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.report-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+    width: 100%;
+}
+
+.report-field-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.report-select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.report-action-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+@media (min-width: 576px) {
+    .report-filters {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .report-field-scope,
+    .report-field-month {
+        flex: 1 1 12rem;
+        max-width: 22rem;
+        width: auto;
+    }
+
+    .report-actions {
+        flex: 0 0 auto;
+        margin-left: auto;
+    }
+
+    .report-action-btn {
+        flex: 0 0 auto;
+        width: auto;
+    }
+}
+
 .table-header {
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
@@ -573,31 +647,48 @@ select.filter-input {
     border-collapse: collapse;
 }
 
+.table-responsive .expense-table:not(.dashboard-table) {
+    min-width: 32rem;
+}
+
+/* Content-sized width: each row stays one line; scroll .table-responsive sideways on narrow screens */
 .dashboard-table {
-    table-layout: fixed;
+    table-layout: auto;
+    width: max-content;
+    min-width: 100%;
 }
 
 .dashboard-table th,
 .dashboard-table td {
     vertical-align: middle;
+    white-space: nowrap;
+}
+
+.dashboard-table td.empty-state {
+    white-space: normal;
+}
+
+.dashboard-table .status-badge {
+    white-space: nowrap;
+    flex-wrap: nowrap;
 }
 
 .dashboard-table th:nth-child(1),
-.dashboard-table td:nth-child(1) { width: 8%; }
+.dashboard-table td:nth-child(1) { min-width: 5.5rem; }
 .dashboard-table th:nth-child(2),
-.dashboard-table td:nth-child(2) { width: 10%; }
+.dashboard-table td:nth-child(2) { min-width: 7rem; }
 .dashboard-table th:nth-child(3),
-.dashboard-table td:nth-child(3) { width: 9%; }
+.dashboard-table td:nth-child(3) { min-width: 5rem; }
 .dashboard-table th:nth-child(4),
-.dashboard-table td:nth-child(4) { width: 9%; }
+.dashboard-table td:nth-child(4) { min-width: 5rem; }
 .dashboard-table th:nth-child(5),
-.dashboard-table td:nth-child(5) { width: 6%; }
+.dashboard-table td:nth-child(5) { min-width: 3.5rem; }
 .dashboard-table th:nth-child(6),
-.dashboard-table td:nth-child(6) { width: 33%; }
+.dashboard-table td:nth-child(6) { min-width: 10rem; }
 .dashboard-table th:nth-child(7),
-.dashboard-table td:nth-child(7) { width: 10%; }
+.dashboard-table td:nth-child(7) { min-width: 6rem; }
 .dashboard-table th:nth-child(8),
-.dashboard-table td:nth-child(8) { width: 15%; }
+.dashboard-table td:nth-child(8) { min-width: 8.5rem; }
 
 .expense-table thead th {
     background: var(--bg-hover);
@@ -848,22 +939,52 @@ body[data-theme="dark"] .status-pending {
 }
 
 /* Modal Styles */
+/* Bootstrap 4 uses overflow:hidden on .modal; overflow-y:auto here lets the overlay scroll on short viewports */
+.modal.fade.show {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 0.5rem 0;
+}
+
+.modal-dialog {
+    margin-top: 0.75rem;
+    margin-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+    max-width: calc(100% - 1rem);
+}
+
 .modal-content {
     border: none;
     border-radius: var(--border-radius);
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.category-modal-body {
-    max-height: 70vh;
+.modal-body {
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* One scroll region (.modal-body); inner limits removed so content is not stuck on mobile */
+.category-modal-body {
+    max-height: none;
+    overflow: visible;
 }
 
 .category-list {
-    max-height: 52vh;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
 }
 
 .modal-header {
+    flex-shrink: 0;
     background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
     color: white;
     border-radius: var(--border-radius) var(--border-radius) 0 0;
@@ -1006,8 +1127,8 @@ body[data-theme="dark"] .list-group-item {
     .table-footer {
         flex-direction: column;
     }
-    
-    .action-btn {
+
+    .table-footer .action-btn {
         width: 100%;
     }
     
@@ -1024,124 +1145,14 @@ body[data-theme="dark"] .list-group-item {
         font-size: 1.1rem;
     }
 
-    /* Recent transactions: stack as labeled cards (fixes fixed-layout overlap on narrow screens) */
-    .dashboard-table {
-        table-layout: auto;
-        width: 100%;
-        display: block;
+    .table-responsive .dashboard-table th,
+    .table-responsive .dashboard-table td {
+        padding: 0.85rem 0.75rem;
     }
 
-    .dashboard-table thead {
-        display: none;
-    }
-
-    .dashboard-table tbody,
-    .dashboard-table tbody tr.expense-row {
-        display: block;
-        width: 100%;
-    }
-
-    .dashboard-table tbody tr.expense-row {
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        margin-bottom: 1rem;
-        padding: 0.5rem 1rem;
-        background: var(--bg-main);
-    }
-
-    body[data-theme="dark"] .dashboard-table tbody tr.expense-row {
-        background: var(--bg-hover);
-    }
-
-    .dashboard-table tbody tr.expense-row:hover {
-        background: var(--bg-hover);
-    }
-
-    body[data-theme="dark"] .dashboard-table tbody tr.expense-row:hover {
-        background: #334155;
-    }
-
-    .dashboard-table tbody tr.expense-row td {
-        display: grid;
-        grid-template-columns: minmax(0, 38%) minmax(0, 1fr);
-        gap: 0.5rem 0.75rem;
-        align-items: start;
-        padding: 0.65rem 0;
-        border-bottom: 1px solid var(--border-color);
-        vertical-align: top;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .dashboard-table tbody tr.expense-row td:last-child {
-        border-bottom: none;
-    }
-
-    .dashboard-table tbody tr.expense-row td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: var(--text-secondary);
-        line-height: 1.35;
-        padding-top: 0.15rem;
-    }
-
-    .dashboard-table .dashboard-cell-value {
-        min-width: 0;
-        word-break: break-word;
-        overflow-wrap: anywhere;
-        text-align: left;
-    }
-
-    .dashboard-table tbody tr.expense-row .actions-cell .dashboard-cell-value {
-        justify-self: stretch;
-        width: 100%;
-    }
-
-    .dashboard-table tbody tr.expense-row .actions-cell .action-btns {
-        flex-direction: column;
-        width: 100%;
-        align-items: stretch;
-    }
-
-    .dashboard-table tbody tr.expense-row .actions-cell .action-btn {
-        width: 100%;
-        white-space: normal;
-    }
-
-    .dashboard-table tbody tr.expense-row .status-badge {
-        min-width: 0;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-    }
-
-    .dashboard-table tbody tr:has(td.empty-state) {
-        border: none;
-        padding: 0;
-        margin-bottom: 0;
-        background: transparent;
-    }
-
-    .dashboard-table tbody tr:has(td.empty-state):hover {
-        background: transparent;
-    }
-
-    .dashboard-table tbody tr:has(td.empty-state) td {
-        display: block;
-        border: none;
-        padding: 3rem 1.5rem;
-        text-align: center;
-    }
-
-    .dashboard-table tbody tr:has(td.empty-state) td::before {
-        display: none;
-    }
-
-    /* Wider tables (e.g. monthly summary): allow horizontal scroll instead of crushing columns */
-    .table-responsive .expense-table:not(.dashboard-table) {
-        min-width: 480px;
+    .dashboard-table .actions-cell .action-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.82rem;
     }
 }
 
